@@ -35,7 +35,7 @@ The `CastExtension` is used by specifying its target type either thru constructo
 > `BoolExtension`, `IntExtension`, `DoubleExtension`, etc,
 > instead of the general purpose `CastExtension`
 
-######examples: 
+#####examples: 
 ```xml
 <!-- old school -->
 <Control><Control.Tag><sys:Int32>-1</sys:Int32></Control.Tag></Control>
@@ -70,10 +70,10 @@ Simplify the ability to get enum values as ItemsSource.
   `<ComboBox ItemsSource="{z:EnumValues globalization:GregorianCalendarTypes, Exclude=11,22}" />`
 - Can also extract the enum value names as string, int number of description of DescriptionAttribute,
   by setting the Mode property.
-  `<ComboBox ItemsSource="{z:EnumValues globalization:GregorianCalendarTypes, Mode=Names}" />`
+  `<ComboBox ItemsSource="{z:EnumValues globalization:GregorianCalendarTypes, Mode=Name}" />`
 - Can provide a value-converter to perform conversion of the results, using the Converter property
 
-######examples: 
+#####examples: 
 ```cs
 enum MachineStateEnum
 {
@@ -102,7 +102,7 @@ enum MachineStateEnum
 <!-- Use value-converter on the enum values -->
 <ComboBox ItemsSource="{z:EnumValues local:MachineStateEnum, Converter={myconv:EnumToStringResourceConverter}" />
 <ComboBox ItemsSource="{z:EnumValues local:MachineStateEnum, Converter={myconv:EnumToReadableStringConverter}" />
-<ComboBox ItemsSource="{z:EnumValues local:MachineStateEnum, Mode=Names, Converter={myconv:ToUpperCaseConverter}" />
+<ComboBox ItemsSource="{z:EnumValues local:MachineStateEnum, Mode=Name, Converter={myconv:ToUpperCaseConverter}" />
 ```
 
 ---
