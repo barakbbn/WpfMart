@@ -11,7 +11,29 @@ value converters, markup-extensions, behaviors, etc.
   * [EnumValues markup-extension](#enumvalues-markup-extension)
 * [Value Converters](#value-converters)
   * [GroupConverter](#groupconverter)
-  
+  * ~~[BoolConverter](#boolconverter)~~
+    * ~~[NegativeBoolConverter](#negativeboolconverter)~~
+  * ~~[BoolToVisibilityConverter](#booltovisibilityconverter)~~
+    * ~~[TrueToCollapsedConverter](#truetocollapsedconverter)~~
+    * ~~[TrueToHiddenConverter](#truetohiddenconverter)~~
+    * ~~[FalseToHiddenConverter](#falsetohiddenconverter)~~
+  * ~~[CastConverter](#castconverter)~~
+  * ~~[EqualityConverter](#equalityconverter)~~
+  * ~~[InRangeConverter](#inrangeconverter)~~
+    * ~~[NumInRangeConverter](#numinrangeconverter)~~
+    * ~~[DateInRangeConverter](#dateinrangeconverter)~~
+  * ~~[NullConverter](#nullconverter)~~
+    * ~~[IsNotNullConverter](#isnotnullconverter)~~
+    * ~~[NullToInvisibleConverter](#nulltoinvisibleconverter)~~
+  * ~~[NullOrEmptyConverter](#nulloremptyconverter)~~
+    * ~~[IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)~~
+    * ~~[NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)~~
+* ~~[Multi Value Converters](#multi-value-converters)~~
+  * ~~[InRangeMultiConverter](#inrangemulticonverter)~~
+  * ~~[EqualityMultiConverter](#equalitymulticonverter)~~
+    
+---  
+
 ## **Markup-extensions**
 ## Casting markup-extension 
 `WpfMart.Markup.CastExtension` 
@@ -139,3 +161,49 @@ When converting back, if one of the converter implement interface ICantConvertBa
 <ContentControl Content="{Binding NullableInt, Converter={StaticResouces NullSafeNumberToMyEnum}" />
 ```
 ---
+
+
+## BoolConverter
+##### NegativeBoolConverter
+-- not yet documented --
+
+## BoolToVisibilityConverter
+##### TrueToCollapsedConverter
+##### TrueToHiddenConverter
+##### FalseToHiddenConverter
+-- not yet documented --
+
+
+## CastConverter
+-- not yet documented --
+
+## EqualityConverter
+-- not yet documented --
+
+## InRangeConverter
+##### NumInRangeConverter
+##### DateInRangeConverter
+-- not yet documented --
+
+## MapConverter
+-- not yet documented --
+
+## NullConverter
+##### IsNotNullConverter
+##### NullToInvisibleConverter
+-- not yet documented --
+
+## NullOrEmptyConverter
+##### IsNotNullOrEmptyConverter
+##### NullOrEmptyToInvisibleConverter
+-- not yet documented --
+
+---
+
+
+## **Multi Value Converters**
+## InRangeMultiConverter
+-- not published documented --
+
+## EqualityMultiConverter
+-- future release --
