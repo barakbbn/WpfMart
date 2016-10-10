@@ -9,7 +9,7 @@ value converters, markup-extensions, behaviors, etc.
 * [Markup extensions](#markup-extensions)
   * [Casting markup-extension](#casting-markup-extension)
   * [EnumValues markup-extension](#enumvalues-markup-extension)
-* [Converters](#converters)
+* [Value Converters](#value-converters)
   * [GroupConverter](#groupconverter)
   
 ## **Markup-extensions**
@@ -57,9 +57,9 @@ The `CastExtension` is used by specifying its target type either thru constructo
 <!-- old school -->
 <ContentControl><ContentControl.Content><sysio:SeekOrigin>-1</sysio:SeekOrigin></ContentControl.Content></ContentControl>
 <!-- lazy and cool -->
-<ContentControl Content="{z:Cast -1, sysio:SeekOrigin}" />
+<ContentControl Content="{z:Cast -1, {x:Type sysio:SeekOrigin}}" />
 
-<ContentControl Content="{z:Cast en-us, globalization:CultureInfo}" />
+<ContentControl Content="{z:Cast en-us, {x:Type globalization:CultureInfo}}" />
 ```
 
 ---
