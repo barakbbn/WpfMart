@@ -2,8 +2,7 @@
 Help on [WpfMart](https://www.nuget.org/packages/WpfMart/) nuget packge.
 
 # WpfMart
-A set of WPF helpers and utilities such as
-value converters, markup-extensions, behaviors, etc.
+A set of WPF helpers and utilities such as value converters, markup-extensions, behaviors, etc.
 
 ## Table of content
 * [Markup extensions](#markup-extensions)
@@ -11,8 +10,8 @@ value converters, markup-extensions, behaviors, etc.
   * [EnumValues markup-extension](#enumvalues-markup-extension)
 * [Value Converters](#value-converters)
   * [GroupConverter](#groupconverter)
-  * ~~[BoolConverter](#boolconverter)~~
-    * ~~[NegativeBoolConverter](#negativeboolconverter)~~
+  * [BoolConverter](#boolconverter)
+    * [NegativeBoolConverter](#negativeboolconverter)
   * ~~[BoolToVisibilityConverter](#booltovisibilityconverter)~~
     * ~~[TrueToCollapsedConverter](#truetocollapsedconverter)~~
     * ~~[TrueToHiddenConverter](#truetohiddenconverter)~~
@@ -37,16 +36,17 @@ value converters, markup-extensions, behaviors, etc.
 ## **Markup-extensions**
 ## Casting markup-extension 
 `WpfMart.Markup.CastExtension` 
-`WpfMart.Markup.BoolExtension`
-`WpfMart.Markup.CharExtension` `WpfMart.Markup.IntExtension` `WpfMart.Markup.LongExtension`
-`WpfMart.Markup.DoubleExtension` `WpfMart.Markup.DecimalExtension`
-`WpfMart.Markup.DateTimeExtension` `WpfMart.Markup.TimeSpanExtension`
+`WpfMart.Markup.IntExtension` `WpfMart.Markup.DoubleExtension` 
+`WpfMart.Markup.LongExtension` `WpfMart.Markup.LongExtension` 
+`WpfMart.Markup.DateTimeExtension` `WpfMart.Markup.TimeSpanExtension` 
+`WpfMart.Markup.CharExtension` `WpfMart.Markup.BoolExtension`
 
-Provides type conversion to the specified type, mainly from a string written in XAML.
+
+Provides type conversion to the specified type, mainly from a string written in XAML. 
 Used as shorthand for writing values of primitive type in XAML in places the expected type is `System.Object`.
 
-> Please note that it's not necessary to do any casting when assigning to a Property of the desired type.
-> ie.
+> Please note that it's not necessary to do any casting when assigning to a Property of the desired type. 
+> e.g. 
 > ```xml
 <!-- no need casting since property type is int (not object) and WPF will convert it for us -->
 <ComboBox SelectedIndex="1" />
@@ -58,9 +58,9 @@ Used as shorthand for writing values of primitive type in XAML in places the exp
 <ComboBox Tag="1" />
 ```
 
-The `CastExtension` is used by specifying its target type either thru constructor or its ToType property.
-> Whenever possible use the more speccific cast markups such as
-> `BoolExtension`, `IntExtension`, `DoubleExtension`, etc,
+The `CastExtension` is used by specifying its target type either thru constructor or its ToType property. 
+> Whenever possible use the more speccific cast markups such as 
+> `BoolExtension`, `IntExtension`, `DoubleExtension`, etc. 
 > instead of the general purpose `CastExtension`
 
 ### examples: 
@@ -92,11 +92,11 @@ The `CastExtension` is used by specifying its target type either thru constructo
 
 Provides Enum's values for the provided Enum type.
 
-Simplify the ability to get enum values as ItemsSource.
+Simplify the ability to get enum values as ItemsSource. 
 - Some values can be excluded from the list by specifying them using the Exclude property 
   as comma delimited names or numbers.
-  `<ComboBox ItemsSource="{z:EnumValues globalization:GregorianCalendarTypes, Exclude=11,22}" />`
-- Can also extract the enum value names as string, int number of description of DescriptionAttribute,
+  `<ComboBox ItemsSource="{z:EnumValues globalization:GregorianCalendarTypes, Exclude=11,22}" />` 
+- Can also extract the enum value names as string, int number of description of DescriptionAttribute, 
   by setting the Mode property.
   `<ComboBox ItemsSource="{z:EnumValues globalization:GregorianCalendarTypes, Mode=Name}" />`
 - Can provide a value-converter to perform conversion of the results, using the Converter property
@@ -142,8 +142,8 @@ enum MachineStateEnum
 
 Groups several value-converters together.
 
-Performs Convert from top to bottom converter and ConvertBack from bottom to top converter.
-If one of the converter's return value is either Binding.DoNothing or DependencyProperty.UnsetValue, the conversion stop.
+Performs Convert from top to bottom converter and ConvertBack from bottom to top converter. 
+If one of the converter's return value is either Binding.DoNothing or DependencyProperty.UnsetValue, the conversion stop. 
 When converting back, if one of the converter implement interface ICantConvertBack, it's skipped from conversion
 
 ### Examples
@@ -164,10 +164,74 @@ When converting back, if one of the converter implement interface ICantConvertBa
 
 
 ## BoolConverter
-##### NegativeBoolConverter
--- not yet documented --
+`WpfMart.Converters.BoolConverter`
+
+Converts a bool or nullable bool value to another value specified by properties TrueValue, FalseFalue and NullValue.
+```xml
+<Control.Resources>
+ <!-- Convert from bool to string value. -->
+ <conv:BoolConverter x:Key="BoolToOnOffConverter" TrueValue="On" FalseValue="Off" />
+                           
+ <!-- Convert from bool to enum value. -->
+ <conv:BoolConverter x:Key="IsTrueToMachineStateEnum" 
+                     TrueValue="{x:Static local:MachineState.On}"
+                     FalseValue="{x:Static local:MachineState.Off}" />
+</Control.Resources>                     
+```
+##### Nullable bool
+In order to support nullable bool, either set NullValue property to a desired value to return when converting a null value 
+or set IsNullable to true and by that, NullValue property will have its default value of null.  
+(which is same as setting NullValue property to {x:Null}. )
+> if none of the above properties are set, null is not converted and considered as false.
+```xml
+<CheckBox IsThreeState="True" IsChecked="{Binding IsChecked, Converter={conv:BoolConverter IsNullable=True}}" />
+<ComboBox SelectedItem="{Binding IsMachineOn, Converter={conv:BoolConverter 
+            TrueValue={x:Static local:MachineState.On}
+            FalseValue={x:Static local:MachineState.Off}
+            NullValue={x:Static local:MachineState.Unknown}}}" />
+```
+
+##### IsNegative
+Converter can be negative, meaning comparing to false instead of true, by setting IsNegative property to true.  
+Although, for that purpose there is a predefined converter:
+#### NegativeBoolConverter
+`WpfMart.Converters.NegativeBoolConverterExtension`
+
+```xml
+<CheckBox x:Name= IsThreeState="True" Content="{Binding IsKnownToBeClosed, Converter={conv:NegativeBoolConverter IsNullable=True}}" />
+<!-- reusing existing BoolConverter, by this time as negative by setting ConverterParameter=True -->
+<ContentControl Content="{Binding IsOff, Converter={StaticResource IsTrueToMachineStateEnum}, ConverterParameter=True}" />
+```
+
+##### Reverse conversion
+There is ability to switch between Convert and ConvertBack, by setting IsReversed property to True.  
+It will check if converted value equals to TrueValue property and return true otherwise false.  
+If null is supported, it's also compared to NullValue property and returns null if equals.
+
+```cs
+enum MachineState { None, On, Off }
+```
+```xml
+<Control.Resources>
+   <!-- reversed conversion. From Combobox.SelectedItem enum value to Checkbox.IsChecked (nullable) -->
+   <conv:BoolConverter x:Key="EnumToIsCheckedConverter" 
+                       IsReversed="True"
+                       TrueValue="{x:Static local:MachineState.On}" 
+                       FalseValue="{x:Static local:MachineState.Off}"
+                       NullValue="{x:Static local:MachineState.None}" />
+</Control.Resources>
+<StackPanel>
+    <ComboBox x:Name="combobox" ItemsSource="{z:EnumValues local:MachineState}" SelectedIndex="0" />
+    <CheckBox IsThreeState="True" 
+              IsChecked="{Binding SelectedItem, ElementName=combobox, Converter={StaticResource EnumToIsCheckedConverter}}"/>
+</StackPanel>
+```
+
+---
 
 ## BoolToVisibilityConverter
+`WpfMart.Converters.BoolToVisibilityConverter`  
+
 ##### TrueToCollapsedConverter
 ##### TrueToHiddenConverter
 ##### FalseToHiddenConverter
