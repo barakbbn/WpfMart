@@ -344,6 +344,7 @@ The special values are:
 > `DependencyProperty.UnsetValue`, `Binding.DoNothing` are still valid.  
 > but now they got markup-extension to make it simpler to use from XAML:  
 > `{conv:UsetValue}`, `{conv:DoNothing}`
+
 ```xml
 <!-- based on the example above. change background only when equls -->
 <conv:EqualityConverter x:Key="CompareToParameterReturnBackground" 
