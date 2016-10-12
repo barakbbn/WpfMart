@@ -12,10 +12,10 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
   * [GroupConverter](#groupconverter)
   * [BoolConverter](#boolconverter)
     * [NegativeBoolConverter](#negativeboolconverter)
-  * ~~[BoolToVisibilityConverter](#booltovisibilityconverter)~~
-    * ~~[TrueToCollapsedConverter](#truetocollapsedconverter)~~
-    * ~~[TrueToHiddenConverter](#truetohiddenconverter)~~
-    * ~~[FalseToHiddenConverter](#falsetohiddenconverter)~~
+  * [BoolToVisibilityConverter](#booltovisibilityconverter)
+    * [TrueToCollapsedConverter](#truetocollapsedconverter)
+    * [TrueToHiddenConverter](#truetohiddenconverter)
+    * [FalseToHiddenConverter](#falsetohiddenconverter)
   * ~~[CastConverter](#castconverter)~~
   * ~~[EqualityConverter](#equalityconverter)~~
   * ~~[InRangeConverter](#inrangeconverter)~~
@@ -237,12 +237,63 @@ enum MachineState { None, On, Off }
 
 ## BoolToVisibilityConverter
 `WpfMart.Converters.BoolToVisibilityConverter`  
+The difference betwen this converter and built-in WPF converter `System.Windows.Data.BooleanToVisibilityConverter`  
+Is that with this converter has additional abilities as follow:  
 
+#### Hidden instead of Collapsed
+it's possible to to use `Visibility.Hidden` instead of `Visibility.Collapsed`  
+###### e.g.
+```xml
+<Border x:Name="ContentPlaceHolder" Visibility="{Binding IsMissings, Converter={conv:BoolToVisibilityConverter UseHidden=True}}" />
+```
+#### IsNegative 
+Converter can be negative, meaning comparing to false instead of true, by setting IsNegative property to true.  
+> Another way to look at it is, return `Visibility.Visible` when converting from `false`,  
+> otherwise `Visibility.Collapsed` (or `Visibility.Hidden` if `UseHidden` property is true)  
+
+###### e.g.
+```xml
+<TextBlock Visibility="{Binding HasLicense, Converter={conv:BoolToVisibilityConverter IsNegative=True}}">
+    <Hyperlink NavigateUri="http://www.url.com/license" >Acquire license here...</Hyperlink>
+</TextBlock>
+```
+
+##### Reverse conversion
+There is ability to switch between Convert and ConvertBack, by setting IsReversed property to True.  
+It will check if converted value equals to `Visibility.Visible` and then return true, otherwise false.  
+(Unless `IsNegative` property is true, and therefore the conversion is opposite)  
+###### e.g.
+```xml
+<StackPanel>
+    <ContentControl x:Name="MovieDetailsViewPlaceHolder" />
+    
+    <TextBox Text="{Binding EditorComments}"
+        IsEnabled="{Binding Content.Visibility, ElementName=MovieDetailsViewPlaceHolder,
+            Converter={conv:BoolToVisibilityConverter IsRevered=True}}"/>
+</StackPanel>
+```
+  
+  
+There are predefined converters of BoolToVisibilityConverter, that are configured to common needs, such as:  
 ##### TrueToCollapsedConverter
+`WpfMart.Converters.TrueToCollapsedConverterExtension`  
+Converts from true to `Visibility.Collapsed`, otherwise to `Visibility.Visible`  
+```xml
+<TextBlock Visibility="{Binding HasLicense, Converter={conv:TrueToCollapsedConverter}}">
+    <Hyperlink NavigateUri="http://www.url.com/license" >Acquire license here...</Hyperlink>
+</TextBlock>
+```
 ##### TrueToHiddenConverter
+`WpfMart.Converters.TrueToHiddenConverterExtension`  
+Converts from true to `Visibility.Hidden`, otherwise to `Visibility.Visible`  
+```xml
+<Border x:Name="ContentPlaceHolder" Visibility="{Binding IsMissings, Converter={conv:TrueToHiddenConverter}}" />
+```
 ##### FalseToHiddenConverter
--- not yet documented --
+`WpfMart.Converters.FalseToHiddenConverterxtension`  
+Converts from false to `Visibility.Hidden`, otherwise to `Visibility.Visible`  
 
+---
 
 ## CastConverter
 -- not yet documented --
