@@ -16,7 +16,7 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * [TrueToCollapsedConverter](#truetocollapsedconverter)
     * [TrueToHiddenConverter](#truetohiddenconverter)
     * [FalseToHiddenConverter](#falsetohiddenconverter)
-  * ~~[CastConverter](#castconverter)~~
+  * [CastConverter](#castconverter)
   * ~~[EqualityConverter](#equalityconverter)~~
   * ~~[InRangeConverter](#inrangeconverter)~~
     * ~~[NumInRangeConverter](#numinrangeconverter)~~
