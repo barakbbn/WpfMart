@@ -167,6 +167,8 @@ When converting back, if one of the converter implement interface ICantConvertBa
 `WpfMart.Converters.BoolConverter`
 
 Converts a bool or nullable bool value to another value specified by properties TrueValue, FalseFalue and NullValue.
+
+### Examples
 ```xml
 <Control.Resources>
  <!-- Convert from bool to string value. -->
@@ -178,11 +180,13 @@ Converts a bool or nullable bool value to another value specified by properties 
                      FalseValue="{x:Static local:MachineState.Off}" />
 </Control.Resources>                     
 ```
-##### Nullable bool
+### Nullable bool
 In order to support nullable bool, either set NullValue property to a desired value to return when converting a null value 
 or set IsNullable to true and by that, NullValue property will have its default value of null.  
 (which is same as setting NullValue property to {x:Null}. )
 > if none of the above properties are set, null is not converted and considered as false.
+
+### Examples
 ```xml
 <CheckBox IsThreeState="True" IsChecked="{Binding IsChecked, Converter={conv:BoolConverter IsNullable=True}}" />
 <ComboBox SelectedItem="{Binding IsMachineOn, Converter={conv:BoolConverter 
@@ -197,6 +201,7 @@ Although, for that purpose there is a predefined converter:
 #### NegativeBoolConverter
 `WpfMart.Converters.NegativeBoolConverterExtension`
 
+### Examples
 ```xml
 <CheckBox x:Name= IsThreeState="True" Content="{Binding IsKnownToBeClosed, Converter={conv:NegativeBoolConverter IsNullable=True}}" />
 <!-- reusing existing BoolConverter, by this time as negative by setting ConverterParameter=True -->
@@ -208,6 +213,7 @@ There is ability to switch between Convert and ConvertBack, by setting IsReverse
 It will check if converted value equals to TrueValue property and return true otherwise false.  
 If null is supported, it's also compared to NullValue property and returns null if equals.
 
+### Examples
 ```cs
 enum MachineState { None, On, Off }
 ```
