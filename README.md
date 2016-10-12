@@ -309,9 +309,9 @@ For each of the special value there is also a corresponding markup-extension tha
 The special values are:  
 * UseInputValue - `{conv:UseInputValue}`  
   Indicates that the converter should use the 'value' parameter passed to the Convert method.  
-* UseConverterParameter - `{conv:UseConverterParameter}`
+* UseConverterParameter - `{conv:UseConverterParameter}`  
   Indicates that the converter should use the ConverterParameter value used in `Binding.ConverterParameter` to the Convert method.
-* ThrowException - `{conv:ThrowException}`
+* ThrowException - `{conv:ThrowException}`  
   Indicates that the converter should throw `System.InvalidOperationException`.  
   Used only as rare option to cause exception in case developer requires that certain conditions won't go unnoticed.  
   Such as to trigger the `System.Windows.Data.Binding.ValidatesOnExceptions` property.  
@@ -333,7 +333,7 @@ The special values are:
     ConverterParameter={x:Static local:MachineState.Off}}}" />   
 ```
 ```xml
-<!-- Cause validation error of the TextBox if using null as text.
+<!-- Cause validation error on the TextBox if using null as text.
     (Prefer doing it in view-model, or using validation rules) -->
 <TextBox Text="{Binding Name, ValidatesOnExceptions=True,
          Converter={conv:NullConverter TrueValue={conv:ThrowException}, FalseValue={conv:UseInputValue}}}" />
@@ -343,15 +343,18 @@ The special values are:
 > Please note that the built-in WPF special values such as:  
 > `DependencyProperty.UnsetValue`, `Binding.DoNothing` are still valid.  
 > but now they got markup-extension to make it simpler to use from XAML:  
-> `{conv:UsetValue}`, `{conv:DoNothing}`
+> `{conv:UnsetValue}`, `{conv:DoNothing}`
 
 ```xml
-<!-- based on the example above. change background only when equls -->
+<!-- based on the example above. change background only when equals -->
 <conv:EqualityConverter x:Key="CompareToParameterReturnBackground" 
                           CompareTo="{conv:UseConverterParameter}" 
                           TrueValue="Green", FalseValue="{Conv:UnsetValue}" />
 ```
+
 ---
+
+
 ## CastConverter
 Converts a value to another type  
 > The difference between CastConverter and CastExtension is that CastConverter.ProvideValue returns IValueConverter,  
