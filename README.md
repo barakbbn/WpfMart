@@ -296,7 +296,50 @@ Converts from false to `Visibility.Hidden`, otherwise to `Visibility.Visible`
 ---
 
 ## CastConverter
--- not yet documented --
+Converts a value to another type  
+> The difference between CastConverter and CastExtension is that CastConverter.ProvideValue returns IValueConverter,  
+> while CastExtension performs the conversion and returns the value after conversion.
+
+```xml
+<ComboBox SelectedItem="{Binding MachineStateNumber, Converter={conv:CastConverter ToType={x:Type local:MachineState}}" />
+```  
+In order to be able to convert-back the `ConvertBackToType` property should be set.
+```xml
+<ComboBox SelectedItem="{Binding MachineStateNumber, 
+            Converter={conv:CastConverter ToType={x:Type local:MachineState}, ConvertBackToType={x:Type sys:Int32}}" />
+```  
+##### Chaining converters
+When used as markup-extension it's possible to chain another converter to convert from.  
+using the `FromConverter` property as follow:  
+```xml
+<!-- Convert from nullable int that represent MachineState enum.
+     If it's null, default it to 0 int value, and continue casting it to MachineState enum value -->
+<TextBlock Text="{Binding NullableMachineStateId,
+    Converter={conv:CastConverter {x:Type local:MachineState},
+    FromConverter={conv:NullConverter TrueValue={z:Int 0}, FalseValue={conv:UseInputValue}}}" />
+```
+> the chaining ability apply most of the value-converters in the package.  
+>   
+> *This ability should not be abused. use it intelligently, in most of the cases a single converter can do the job.*  
+> When not used with markup-extension syntax, wrap with [GroupConverter](#groupconverter) to chain several converters.
+
+#### Example
+```cs
+enum MachineState { None, On, Off }
+```
+```xml
+<Control.Resources>
+    <conv:GroupConverter x:Key="NullSafeNumberToMachineStateEnum">
+        <conv:NullConverter TrueValue="{z:Int 0}" FalseValue="{conv:UseInputValue}" />
+        <conv:CastConverter ToType="{x:Type local:MachineState}" />
+    </conv:GroupConverter>
+</Control.Resources>
+
+<TextBlock Text="{Binding NullableMachineStateId, Converter={StaticResource NullSafeNumberToMachineStateEnum}}" />
+```
+
+---
+
 
 ## EqualityConverter
 -- not yet documented --
