@@ -16,8 +16,9 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * [TrueToCollapsedConverter](#truetocollapsedconverter)
     * [TrueToHiddenConverter](#truetohiddenconverter)
     * [FalseToHiddenConverter](#falsetohiddenconverter)
+  * *[Converter special values](#converter-special-values)*
   * [CastConverter](#castconverter)
-  * ~~[EqualityConverter](#equalityconverter)~~
+  * [EqualityConverter](#equalityconverter)
   * ~~[InRangeConverter](#inrangeconverter)~~
     * ~~[NumInRangeConverter](#numinrangeconverter)~~
     * ~~[DateInRangeConverter](#dateinrangeconverter)~~
@@ -192,7 +193,7 @@ or set IsNullable to true and by that, NullValue property will have its default 
 <ComboBox SelectedItem="{Binding IsMachineOn, Converter={conv:BoolConverter 
             TrueValue={x:Static local:MachineState.On}
             FalseValue={x:Static local:MachineState.Off}
-            NullValue={x:Static local:MachineState.Unknown}}}" />
+            NullValue={x:Static local:MachineState.None}}}" />
 ```
 
 ##### IsNegative
@@ -258,7 +259,7 @@ Converter can be negative, meaning comparing to false instead of true, by settin
 </TextBlock>
 ```
 
-##### Reverse conversion
+##### IsReversed
 There is ability to switch between Convert and ConvertBack, by setting IsReversed property to True.  
 It will check if converted value equals to `Visibility.Visible` and then return true, otherwise false.  
 (Unless `IsNegative` property is true, and therefore the conversion is opposite)  
@@ -295,6 +296,61 @@ Converts from false to `Visibility.Hidden`, otherwise to `Visibility.Visible`
 
 ---
 
+## Converter special values
+In some of the converters, where it has a property that can be set to any object,  
+i.e. `BoolConverter.TrueValue`, `EqualityComparer.CompareTo`  
+It's possible to provide special values from `WpfMart.Converters.ConverterSpecialValue`  
+That will affect the desired behavior of the converter.  
+##### e.g
+```xml
+<conv:BoolConverter TrueValue="{x:Static conv:ConverterSpecialValue.UseConverterParameter}" />
+```
+For each of the special value there is also a corresponding markup-extension that is simpler to use than the `{x:Static}` syntax.  
+The special values are:  
+* UseInputValue - `{conv:UseInputValue}`  
+  Indicates that the converter should use the 'value' parameter passed to the Convert method.  
+* UseConverterParameter - `{conv:UseConverterParameter}`
+  Indicates that the converter should use the ConverterParameter value used in `Binding.ConverterParameter` to the Convert method.
+* ThrowException - `{conv:ThrowException}`
+  Indicates that the converter should throw `System.InvalidOperationException`.  
+  Used only as rare option to cause exception in case developer requires that certain conditions won't go unnoticed.  
+  Such as to trigger the `System.Windows.Data.Binding.ValidatesOnExceptions` property.  
+
+### Examples
+```xml
+<Control.Resources>
+  <conv:EqualityConverter x:Key="CompareToParameterReturnBackground" 
+                          CompareTo="{conv:UseConverterParameter}" 
+                          TrueValue="Green", FalseValue="Red" />
+</Control.Resources>
+<TextBlock Text="On" 
+  Background="{Binding MachineState, 
+    Converter={StaticResource CompareToParameterReturnBackground}, 
+    ConverterParameter={x:Static local:MachineState.On}}}" />
+<TextBlock Text="Off" 
+  Background="{Binding MachineState, 
+    Converter={StaticResource CompareToParameterReturnBackground}, 
+    ConverterParameter={x:Static local:MachineState.Off}}}" />   
+```
+```xml
+<!-- Cause validation error of the TextBox if using null as text.
+    (Prefer doing it in view-model, or using validation rules) -->
+<TextBox Text="{Binding Name, ValidatesOnExceptions=True,
+         Converter={conv:NullConverter TrueValue={conv:ThrowException}, FalseValue={conv:UseInputValue}}}" />
+```  
+
+
+> Please note that the built-in WPF special values such as:  
+> `DependencyProperty.UnsetValue`, `Binding.DoNothing` are still valid.  
+> but now they got markup-extension to make it simpler to use from XAML:  
+> `{conv:UsetValue}`, `{conv:DoNothing}`
+```xml
+<!-- based on the example above. change background only when equls -->
+<conv:EqualityConverter x:Key="CompareToParameterReturnBackground" 
+                          CompareTo="{conv:UseConverterParameter}" 
+                          TrueValue="Green", FalseValue="{Conv:UnsetValue}" />
+```
+---
 ## CastConverter
 Converts a value to another type  
 > The difference between CastConverter and CastExtension is that CastConverter.ProvideValue returns IValueConverter,  
@@ -342,7 +398,53 @@ enum MachineState { None, On, Off }
 
 
 ## EqualityConverter
--- not yet documented --
+`WpfMart.Converters.EqualityConverter`  
+Checks if converted value equals to the value of `CompareTo` property  ,
+if equals, return value of `TrueValue` property, otherwise `FalseValue` property.  
+
+#### Examples
+```xml
+<CheckBox IsChecked="{Binding SeekOrigin, CompareTo={x:Static sysio:SeekOrigin.Current}}" />
+```
+
+```cs
+enum MachineState { None, On, Off }
+```
+```xml
+<ComboBox SelectedItem="{Binding MachineState, Converter={conv:EqualityConverter
+            CompareTo={x:Static local:MachineState.None}
+            TrueValue={x:Null}
+            FalseValue={conv:UseInputValue}}}">
+    <x:Static Member="local:MachineState.On" />
+    <x:Static Member="local:MachineState.Off" />
+</ComboBox>
+
+```
+##### IsNegative
+Converter can be negative, meaning checking if the value is not equals to the `CompareTo` property,  
+by setting `IsNegative` property to true.  
+```xml
+<!-- If no items or only one item in combo-box, make it disabled -->
+<ComboBox SelectedIndex="0"
+    IsEnabled="{Binding Items.Count, RelativeSource={RelativeSource Self}, 
+        Converter={conv:EqualityConverter IsNegative=True, CompareTo={z:Int 0}}}"   />
+```
+### null value
+In order to specially handle conversion from a null value,   
+either set `NullValue` property to a desired value to return when converting a null value,  
+or set IsNullable to true and by that, NullValue property will have its default value of null.  
+(which is same as setting NullValue property to {x:Null}. )
+> if none of the above properties are set, null is not converted and compared to `CompareTo` property.
+
+##### Chaining converters
+When used as markup-extension it's possible to chain another converter to convert from.  
+using the `FromConverter` property as follow:  
+```xml
+<!-- compare to string "YES" and ensure any string is first converted to upper-case -->
+<TextBlock Text="{Binding UserInput,
+  Converter={conv:EqualityConverter CompareTo='YES', TrueValue='Confirmed', FalseValue='---', NullValue='invalid'
+  FromConverter={notmycon:ToUpperCaseConverter}}} />
+```
 
 ## InRangeConverter
 ##### NumInRangeConverter
@@ -371,3 +473,4 @@ enum MachineState { None, On, Off }
 
 ## EqualityMultiConverter
 -- future release --
+
