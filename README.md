@@ -22,6 +22,7 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
   * ~~[InRangeConverter](#inrangeconverter)~~
     * ~~[NumInRangeConverter](#numinrangeconverter)~~
     * ~~[DateInRangeConverter](#dateinrangeconverter)~~
+  * [MapConverter](#mapconverter)
   * ~~[NullConverter](#nullconverter)~~
     * ~~[IsNotNullConverter](#isnotnullconverter)~~
     * ~~[NullToInvisibleConverter](#nulltoinvisibleconverter)~~
@@ -424,7 +425,7 @@ enum MachineState { None, On, Off }
 </ComboBox>
 
 ```
-##### IsNegative
+### IsNegative
 Converter can be negative, meaning checking if the value is not equals to the `CompareTo` property,  
 by setting `IsNegative` property to true.  
 ```xml
@@ -440,7 +441,7 @@ or set IsNullable to true and by that, NullValue property will have its default 
 (which is same as setting NullValue property to {x:Null}. )
 > if none of the above properties are set, null is not converted and compared to `CompareTo` property.
 
-##### Chaining converters
+### Chaining converters
 When used as markup-extension it's possible to chain another converter to convert from.  
 using the `FromConverter` property as follow:  
 ```xml
@@ -454,9 +455,146 @@ using the `FromConverter` property as follow:
 ##### NumInRangeConverter
 ##### DateInRangeConverter
 -- not yet documented --
+---
+
 
 ## MapConverter
--- not yet documented --
+`WpfMart.Converters.MapConverter`  
+Converts a key to a mapped value.
+
+Defines a dictionary of key-value pairs for which a converted value is considered a key in the dictionary  
+and the matching value for the key is returned as result.  
+The dictionary is defined in the same manner as a `ResourceDictionary` is defined in XAML.
+
+##### e.g.
+```xml
+<Window.Resources>
+  <!-- Map System.IO.SeekOrigin enum values to icons -->
+  <conv:MapConverter x:Key="SeekOriginToIcon">
+    <BitmapImage x:Key="{x:Static sysio:SeekOrigin.Begin}" UriSource="../Assets/SeekBegin.png" />
+    <BitmapImage x:Key="{x:Static sysio:SeekOrigin.Current}" UriSource="../Assets/SeekCurrent.png" />
+    <BitmapImage x:Key="{x:Static sysio:SeekOrigin.End}" UriSource="../Assets/SeekEnd.png" />
+  </conv:MapConverter>
+</Window.Resources>
+<Button Command="{Binding SeekToCommand}" >
+  <Image Source="{Binding SelectedSeekOrigin, Converter={StaticResource SeekOriginToIcon}}" />
+</Button>
+```
+
+In case the key not found in the dictionary, there will be an attempt to located by its `ToString()` value.  
+This in order to make it more flexible to specify some keys in XAML.    
+(Illustration on the above example)  
+```xml
+  <conv:MapConverter x:Key="SeekOriginToIcon">
+    <BitmapImage x:Key="Begin" UriSource="../Assets/SeekBegin.png" />
+    <BitmapImage x:Key="Current" UriSource="../Assets/SeekCurrent.png" />
+    <BitmapImage x:Key="End" UriSource="../Assets/SeekEnd.png" />
+  </conv:MapConverter>
+```
+### Fallback value
+If the key couldn't be found in the dictionary, a fallback-value is used,  
+by setting the desired value in the `FallbackValue` property.  
+by default it will return the key itself, which is actually the input value to be converted.  
+##### e.g.
+```xml
+<Window.Resources>
+  <!-- Map System.Globalization.GregorianCalendarTypes enum values to texts -->
+  <conv:MapConverter x:Key="GregorianCalendarTypesToText" FallbackValue="-----">
+    <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.Localized}" >Local</sys:String>
+    <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.USEnglish}" >English</sys:String>
+    <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.Arabic}"    >Arabic</sys:String>
+  </conv:MapConverter>
+</Window.Resources>
+<TextBlock Text="{Binding SelectedCalendarType, Converter={StaticResource GregorianCalendarTypesToText}}" />
+```
+
+### null value
+In order to map a null to a value, it's not possible to set it as a key in a dictionary.  
+~~`<conv:MapConverter><sys:String x:Key={x:Null}>No value</sys:String></conv:MapConverter>`~~  
+For this purpose use the `NullValue` property to set the value to return when converting from null.
+
+#### Examlpes
+```cs
+enum MachineState { None, On, Off, Faulted, Maintenance }
+```
+```xml
+<Window.Resources>
+  <SolidColorBrush x:Key="GrayBrush" Color="Gray" />
+  <conv:MapConverter x:Key="MachineStateToBackground" NullValue="{StaticResource GrayBrush}" FallbackValue="{conv:UnsetValue}" >
+    <SolidColorBrush x:Key="{x:Static local:MachineState.On}" Color="Green" />
+    <SolidColorBrush x:Key="{x:Static local:MachineState.Off}" Color="Red" />
+    <SolidColorBrush x:Key="{x:Static local:MachineState.Faulted}" Color="Orange" />
+  </conv:MapConverter>
+</Window.Resources>
+```
+### Converting back
+The MapConverter also performs convert-back.  
+To specify a fallback value in case convert-back cannot find vaue in the dictionary,  
+use the `ConvertBackFallbackValue` property. by default it cancel the conversion (`Binding.DoNothing`).  
+> in case more than one key mapped to the same value,  
+> The resulting key from convert-back can be any of them.
+
+
+### Mapping to another converter
+If a mapped value in the dictionary is a value-converter, by default it will be used in order to produce the final value.  
+*to disalbe this ability, set `ConvertAlsoFoundValueConverter` property to false.*  
+*Also convert-back cannot handle it.*
+```xml
+<!-- Map familier angles to named-angle, for the rest of them, convert them from double to integer -->
+<conv:MapConverter x:Key="AngleToNameOrRoundedAngle" FallbackValue="{conv:CastConverter ToType={x:Type sys:Int32}}" >
+  <sys:String x:Key="{z:Double 0.0}"  >Zero</sys:String>
+  <sys:String x:Key="{z:Double 90.0}" >Ninty</sys:String>
+  <sys:String x:Key="{z:Double 180.0}">One hundred eighty</sys:String>
+</conv:MapConverter>
+<TextBlock Text="{Binding Angle, Converter={StaticResource AngleToNameOrRoundedAngle}}" />
+```
+
+### Recap Examples
+```cs
+enum MachineState { None, On, Off, Faulted, Maintenance }
+```
+```xml
+<Window.Resources>
+    <!-- Map two of the enum values to boolean true and false. have the rest of the enum values fallback to null .
+         When converting back, unmapped value is fallback to MachineState.None on the view-model's property -->
+   <conv:MapConverter x:Key="MachineStateToIsChecked" FallbackValue="{x:Null}" 
+                      ConvertBackFallbackValue="{x:Static local:MachineState.None}" >
+        <sys:Boolean x:Key="{x:Static local:MachineState.On}" >True</sys:Boolean>
+        <sys:Boolean x:Key="{x:Static local:MachineState.Off}" >False</sys:Boolean>
+    </conv:MapConverter>
+    
+     <!-- Map enum values to brushes used by CheckBox.Foreground property.
+          unmapped enum values are fallback to the Foreground default value by using DependencyProperty.UnsetValue. -->
+    <conv:MapConverter x:Key="MachineStateToForeground" FallbackValue="{conv:UnsetValue}">
+        <SolidColorBrush x:Key="{x:Static local:MachineState.On}" Color="Green" />
+        <SolidColorBrush x:Key="{x:Static local:MachineState.Off}" Color="Red" />
+        <SolidColorBrush x:Key="{x:Static local:MachineState.Faulted}" Color="Orange" />
+    </conv:MapConverter>
+
+     <!-- Map from a brush to a string of the brush's color name, converting from a CheckBox.Foreground to CheckBox.Content.
+         the mapped keys are the Brush.ToString().
+         unmapped keys fallback to a dahes rectangle. -->
+    <conv:MapConverter x:Key="ForegroundToTextConverter" NullValue="{x:Null}" >
+        <sys:String x:Key="#FF008000" >Green</sys:String>
+        <sys:String x:Key="#FFFF0000" >Red</sys:String>
+        <sys:String x:Key="#FFFFA500" >Orange</sys:String>
+
+        <conv:MapConverter.FallbackValue>
+            <Rectangle Width = "50" Height="2" StrokeThickness="2" Stroke="Blue" StrokeDashArray="1,2,1,2" Margin="1,7" />
+        </conv:MapConverter.FallbackValue>
+    </conv:MapConverter>
+ </Window.Resources>
+ 
+ <CheckBox x:Name="MachineStateToThreeStateCheck" IsThreeState="True"
+   IsChecked="{Binding MachineState, Converter={StaticResource MachineStateToIsChecked}}"
+   Content="{Binding Foreground, RelativeSource={RelativeSource Self}, Mode=OneWay, 
+                     Converter={StaticResource ForegroundToTextConverter}}"
+   Foreground="{Binding MachineState, Mode=OneWay, Converter={StaticResource MachineStateToForeground}}" />
+```
+
+---
+
+
 
 ## NullConverter
 ##### IsNotNullConverter
