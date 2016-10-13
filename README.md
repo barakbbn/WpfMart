@@ -23,9 +23,9 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * ~~[NumInRangeConverter](#numinrangeconverter)~~
     * ~~[DateInRangeConverter](#dateinrangeconverter)~~
   * [MapConverter](#mapconverter)
-  * ~~[NullConverter](#nullconverter)~~
-    * ~~[IsNotNullConverter](#isnotnullconverter)~~
-    * ~~[NullToInvisibleConverter](#nulltoinvisibleconverter)~~
+  * [NullConverter](#nullconverter)
+    * [IsNotNullConverter](#isnotnullconverter)
+    * [NullToInvisibleConverter](#nulltoinvisibleconverter)
   * ~~[NullOrEmptyConverter](#nulloremptyconverter)~~
     * ~~[IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)~~
     * ~~[NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)~~
@@ -33,7 +33,7 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
   * ~~[InRangeMultiConverter](#inrangemulticonverter)~~
   * ~~[EqualityMultiConverter](#equalitymulticonverter)~~
     
----  
+--------------------------------------------------------------------------------
 
 ## **Markup-extensions**
 ## Casting markup-extension 
@@ -86,7 +86,7 @@ The `CastExtension` is used by specifying its target type either thru constructo
 <ContentControl Content="{z:Cast en-us, globalization:CultureInfo}" />
 ```
 
----
+--------------------------------------------------------------------------------
 
 
 ## EnumValues markup-extension
@@ -135,7 +135,7 @@ enum MachineStateEnum
 <ComboBox ItemsSource="{z:EnumValues local:MachineStateEnum, Mode=Name, Converter={myconv:ToUpperCaseConverter}" />
 ```
 
----
+--------------------------------------------------------------------------------
 
 
 ## **Value Converters**
@@ -162,12 +162,12 @@ When converting back, if one of the converter implement interface ICantConvertBa
 </Control.Resources>
 <ContentControl Content="{Binding NullableInt, Converter={StaticResouces NullSafeNumberToMyEnum}" />
 ```
----
+
+--------------------------------------------------------------------------------
 
 
 ## BoolConverter
-`WpfMart.Converters.BoolConverter`
-
+`WpfMart.Converters.BoolConverter`  
 Converts a bool or nullable bool value to another value specified by properties TrueValue, FalseFalue and NullValue.
 
 ### Examples
@@ -186,8 +186,8 @@ Converts a bool or nullable bool value to another value specified by properties 
 In order to support nullable bool, either set NullValue property to a desired value to return when converting a null value 
 or set IsNullable to true and by that, NullValue property will have its default value of null.  
 (which is same as setting NullValue property to {x:Null}. )
-> if none of the above properties are set, null is not converted and considered as false.
-
+> if none of the above properties are set, null is not converted and considered as false.  
+> Consider using the Binding's TargetNullValue instead.  
 ### Examples
 ```xml
 <CheckBox IsThreeState="True" IsChecked="{Binding IsChecked, Converter={conv:BoolConverter IsNullable=True}}" />
@@ -235,7 +235,7 @@ enum MachineState { None, On, Off }
 </StackPanel>
 ```
 
----
+--------------------------------------------------------------------------------
 
 ## BoolToVisibilityConverter
 `WpfMart.Converters.BoolToVisibilityConverter`  
@@ -295,7 +295,7 @@ Converts from true to `Visibility.Hidden`, otherwise to `Visibility.Visible`
 `WpfMart.Converters.FalseToHiddenConverterxtension`  
 Converts from false to `Visibility.Hidden`, otherwise to `Visibility.Visible`  
 
----
+--------------------------------------------------------------------------------
 
 ## Converter special values
 In some of the converters, where it has a property that can be set to any object,  
@@ -353,7 +353,7 @@ The special values are:
                           TrueValue="Green", FalseValue="{Conv:UnsetValue}" />
 ```
 
----
+--------------------------------------------------------------------------------
 
 
 ## CastConverter
@@ -399,7 +399,7 @@ enum MachineState { None, On, Off }
 <TextBlock Text="{Binding NullableMachineStateId, Converter={StaticResource NullSafeNumberToMachineStateEnum}}" />
 ```
 
----
+--------------------------------------------------------------------------------
 
 
 ## EqualityConverter
@@ -439,8 +439,8 @@ In order to specially handle conversion from a null value,
 either set `NullValue` property to a desired value to return when converting a null value,  
 or set IsNullable to true and by that, NullValue property will have its default value of null.  
 (which is same as setting NullValue property to {x:Null}. )
-> if none of the above properties are set, null is not converted and compared to `CompareTo` property.
-
+> if none of the above properties are set, null is not converted and compared to `CompareTo` property.  
+> Consider using the Binding's TargetNullValue instead.  
 ### Chaining converters
 When used as markup-extension it's possible to chain another converter to convert from.  
 using the `FromConverter` property as follow:  
@@ -455,7 +455,8 @@ using the `FromConverter` property as follow:
 ##### NumInRangeConverter
 ##### DateInRangeConverter
 -- not yet documented --
----
+
+--------------------------------------------------------------------------------
 
 
 ## MapConverter
@@ -511,8 +512,8 @@ by default it will return the key itself, which is actually the input value to b
 ### null value
 In order to map a null to a value, it's not possible to set it as a key in a dictionary.  
 ~~`<conv:MapConverter><sys:String x:Key={x:Null}>No value</sys:String></conv:MapConverter>`~~  
-For this purpose use the `NullValue` property to set the value to return when converting from null.
-
+For this purpose use the `NullValue` property to set the value to return when converting from null.  
+> Consider using the Binding's TargetNullValue instead.  
 #### Examlpes
 ```cs
 enum MachineState { None, On, Off, Faulted, Maintenance }
@@ -592,14 +593,52 @@ enum MachineState { None, On, Off, Faulted, Maintenance }
    Foreground="{Binding MachineState, Mode=OneWay, Converter={StaticResource MachineStateToForeground}}" />
 ```
 
----
-
+--------------------------------------------------------------------------------
 
 
 ## NullConverter
+`WpfMart.Converters.NullConverter`  
+Converts from a null value to another value specified by properties `TrueValue` and `FalseFalue`.
+
+NullConverter is usually not useful, as other converters can achieve same abilities, but it's most common usages are:  
+* return true/false in case input value is null or not - this is the default behavior.
+
+  ```xml
+  <CheckBox Content="Use default" IsChecked="{Binding SelectedItem, Converter={conv:NullConverter}}" /> 
+  ```
+* convert null value to something else but in case the input value is not null, keep it as is without converting it. 
+   
+   > Note: prefer using the Binding's TargetNullValue instead, unless requiring more advanced usages.
+   ```xml
+   <!-- example where NullConverter should be avoided -->
+   <ComboBox SelectedItem="{Binding SelectedTraceLevel, TargetNullValue={x:Static diag:TraceLevel.Off}}" />
+   ```
+   ```xml
+   <Window.Resources>
+     <!-- Instead of setting same TargetNullValue on all bindings, reuse it thru NullConverter-->
+     <conv:NullConverter x:Key="NullToDefaultColor" TrueValue="{conv:UnsetValue}" FalseValue="{conv:UseInputValue}" />
+   </Window.Resources>
+   <!-- --This could be achieved also by style -->
+   <RadioButton Background="{Binding ColorA, Converter={StaticResource NullToDefaultColor}}" />
+   <RadioButton Background="{Binding ColorB, Converter={StaticResource NullToDefaultColor}}" />
+   <RadioButton Background="{Binding ColorC, Converter={StaticResource NullToDefaultColor}}" />
+   ```
+* return true in case input value is not null, false otherwise. (negative to option 1 above).  
+   This can be achieved by setting the `IsNegative` property to true. 
+   There is also a predefined `IsNotNullConverterExtension"` converter used to perform negative conversion.
+
+> Note: If it's required to check if value is *null or empty string/collection*, use `NullOrEmptyConverter` instead.  
+
 ##### IsNotNullConverter
+`WpfMart.Converters.IsNotNullConverterExtension`  
+Pre configured converter, to convert a null to `false` and non-null value to `true`.  
 ##### NullToInvisibleConverter
--- not yet documented --
+`WpfMart.Converters.NullToInvisibleConverterExtension`  
+Pre configured converter, to convert a null to `Visiblity.Collapsed`, otherwise to` Visiblity.Visible`.
+
+
+--------------------------------------------------------------------------------
+
 
 ## NullOrEmptyConverter
 ##### IsNotNullOrEmptyConverter
