@@ -26,9 +26,9 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * ~~[NumInRangeConverter](#numinrangeconverter)~~
     * ~~[DateInRangeConverter](#dateinrangeconverter)~~
   * [MapConverter](#mapconverter)
-  * ~~[NullOrEmptyConverter](#nulloremptyconverter)~~
-    * ~~[IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)~~
-    * ~~[NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)~~
+  * [NullOrEmptyConverter](#nulloremptyconverter)
+    * [IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)
+    * [NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)
 * ~~[Multi Value Converters](#multi-value-converters)~~
   * ~~[InRangeMultiConverter](#inrangemulticonverter)~~
   * ~~[EqualityMultiConverter](#equalitymulticonverter)~~
@@ -404,7 +404,7 @@ enum MachineState { None, On, Off }
 
 ## EqualityConverter
 `WpfMart.Converters.EqualityConverter`  
-Checks if converted value equals to the value of `CompareTo` property  ,
+Checks if converted value equals to the value of `CompareTo` property,  
 if equals, return value of `TrueValue` property, otherwise `FalseValue` property.  
 
 #### Examples
@@ -433,7 +433,7 @@ If the `CompareTo` property is not set, then by default it's `nul`l and therefor
 Converter can be negative, meaning checking if the value is not equals to the `CompareTo` property,  
 by setting `IsNegative` property to true.  
 ```xml
-<!-- If no items or only one item in combo-box, make it disabled -->
+<!-- If no items in combo-box, make it disabled -->
 <ComboBox SelectedIndex="0"
     IsEnabled="{Binding Items.Count, RelativeSource={RelativeSource Self}, 
         Converter={conv:EqualityConverter IsNegative=True, CompareTo={z:Int 0}}}"   />
@@ -624,9 +624,57 @@ enum MachineState { None, On, Off, Faulted, Maintenance }
 
 
 ## NullOrEmptyConverter
+`WpfMart.Converters.MapConverter`  
+Checks if converted value is either null or empty string or empty collection (`IEnumerable`),  
+if equals, return value of `TrueValue` property, otherwise `FalseValue` property.  
+```xml
+<!-- Enable the scan devices hyperlink only if list of devices is null or empty -->
+<TextBlock IsEnabled="{Binding DevicesList, Converter={conv:NullOrEmptyConverter}}">
+    <Hyperlink NavigateUri="http://www.url.com/license" >Scan devices...</Hyperlink>
+</TextBlock>
+```
+```xml
+<Border BorderBrush="{Binding Username, Converter={conv:NullOrEmptyConverter TrueValue=Orange, FalseValue=Green}}" BorderThickness="2">
+  <TextBox Text="{Binding Username}" />
+</Border>
+```
+
+In order to check only for empty string/collection, change the `Mode` property from `IsNullOrEmpty` (default) to `IsEmpty`.  
+`<conv:NullOrEmptyConverter Mode=IsEmpty />`
+
+
+### IsNegative
+Converter can be negative, and check if the value is niether null nor empty string/collection,  
+by setting `IsNegative` property to `true`.  
+
+```xml
+<!-- If no items in combo-box, make it disabled -->
+<ComboBox SelectedIndex="0"
+    IsEnabled="{Binding Items, RelativeSource={RelativeSource Self}, 
+        Converter={conv:NullOrEmptyConverter IsNegative=True}}"   />
+```   
+There are predefined converters of `NullOrEmptyConverter`, that are configured to common needs, such as:
 ##### IsNotNullOrEmptyConverter
+`WpfMart.Converters.IsNotNullOrEmptyConverterExtension`  
+Convert a null or empty string/collection to `false`, otherwise to `true`.  
+```xml
+<!-- If no items in combo-box, make it disabled -->
+<ComboBox SelectedIndex="0"
+    IsEnabled="{Binding Items, RelativeSource={RelativeSource Self}, Converter={conv:IsNotNullOrEmptyConverter}}" />
+``` 
 ##### NullOrEmptyToInvisibleConverter
--- not yet documented --
+`WpfMart.Converters.NullOrEmptyToInvisibleConverterExtension`  
+Convert a null or empty string/collection to `Visibility.Collapsed`, otherwise `Visibility.Visible`.
+```xml
+<!-- If no items in combo-box, hide it -->
+<ComboBox SelectedIndex="0"
+    Visibility="{Binding Items, RelativeSource={RelativeSource Self}, Converter={conv:NullOrEmptyToInvisibleConverter}}" />
+```  
+
+
+### Chaining converters
+This converter also has the ability to chain another converter to convert from.  
+using the `FromConverter` property. (see previous examples).  
 
 ---
 
