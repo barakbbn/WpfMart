@@ -22,9 +22,9 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * [EqualityToVisibilityConverter](#equalitytovisibilityconverter)
     * [IsNotNullConverter](#isnotnullconverter)
     * [NullToInvisibleConverter](#nulltoinvisibleconverter)  
-  * ~~[InRangeConverter](#inrangeconverter)~~
-    * ~~[NumInRangeConverter](#numinrangeconverter)~~
-    * ~~[DateInRangeConverter](#dateinrangeconverter)~~
+  * [InRangeConverter](#inrangeconverter)
+    * [NumInRangeConverter](#numinrangeconverter)
+    * [DateInRangeConverter](#dateinrangeconverter)
   * [MapConverter](#mapconverter)
   * [NullOrEmptyConverter](#nulloremptyconverter)
     * [IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)
@@ -478,9 +478,145 @@ Converts a null to `Visiblity.Collapsed`, otherwise to `Visiblity.Visible`.
 
 
 ## InRangeConverter
+`WpfMart.Converters.InRangeConverter`  
+Check if value is in range of lower and/or upper bounds.  
+if in range, returns `TrueValue` property , otherwise `FalseValue` property.  
+The range of values is specified using:  
+* `From`property, for inclusive lower bound, **or** `After` property, for exclusive lower bound.  
+* `To` property, for inclusive upper bound, **or** `Before` property, for exclusive upper bound.
+
+The more interesting aspect of the converter is to perform **greater-than/less-than** conditions  
+by only specifying one of the bounds (lower or upper) as follow:  
+```xml
+<!--  if value >= TraceLevel.Error -->
+<conv:InRangeConverter From="{x:Static diag:TraceLevel.Error}" />
+<!--  if value > TraceLevel.Error -->
+<conv:InRangeConverter After="{x:Static diag:TraceLevel.Error}" />
+<!--  if value <= TraceLevel.Info -->
+<conv:InRangeConverter To="{x:Static diag:TraceLevel.Info}" />
+<!--  if value < TraceLevel.Info -->
+<conv:InRangeConverter Before="{x:Static diag:TraceLevel.Info}" />
+```
+```xml
+<!-- Notify user about the affects or logging from Info and above -->
+<TextBlock 
+  Visibility="{Binding TraceLevel, Converter={conv:InRangeConverter 
+                From={x:Static diag:TraceLevel.Info},
+                TrueValue=Visible, FalseValue=Collapsed}}"
+  Text="Note: Log file might contain too many entries and get over sized" />
+```
+
+Some notes:
+* Avoid setting upper to be less than or equals to the lower bound, as the converter won't function as expected.
+* In case setting same value for lower and upper bound, it's same as comparing to a specific value, 
+  therefore prefer using `EqualityConverter` converter instead.
+
+
+### IsNegative
+Converter can be negative, meaning checking if the value is not in range,  
+by setting `IsNegative` property to true.  
+> Note: `null` value is considered out of range.  
+
+```cs
+enum CustomerType { Regular, Repeating, Loyal, Vip, OurEmployee }
+```
+```xml
+<Window.Resources>
+  <!-- Check if customer is not preferred customer -->
+  <conv:InRangeConverter x:Key="IsNotPreferredCustomer" IsNegative="True"
+                         From="{x:Static local:CustomerType.Repeating}"
+                         To="{x:Static local:CustomerType.Vip}" />
+</Window.Resources>
+<TextBox Text="{Binding PromoCode}" IsReadOnly="{Binding CustomerType, Converter={StaticResource IsNotPreferredCustomer}}"/>
+```
+
+### null value
+In order to specially handle conversion from a `null` value,   
+either set `NullValue` property to a desired value to return when converting a null value,  
+or set IsNullable to true and by that, NullValue property will have its default value of null.  
+(which is same as setting NullValue property to {x:Null}. )
+> if none of the above properties are set, no special handling for `null` is done and it's considered not in range,  
+> but resulting value depends on the `IsNegative` property.  
+> **Consider using the Binding's TargetNullValue instead.**  
+
+
+
+*In order to specify range value of numeric types of date-time, it's possible to use the `CastExtension` parts,  
+such as {z:Int}, {z:Double}, {z:DateTime}, etc...  
+But, there are predefined `InRangeConverter`converters configured for common usages such as that:*  
 ##### NumInRangeConverter
+`WpfMart.Converters.NumInRangeConverter`  
+A `InRangeConverter` that used numeric values as lower/upper bounds.  
+It `From`,`After`,`To`,`Before` properties are of type `Decimal`.  
+```xml
+<!-- Disable combo-box if no items or only one items in list (ensuring item is selected) -->
+<ComboBox ItemsSource="{Binding Users}" SelectedIndex="0"
+  IsEnabled="{Binding Items, RelativeSource={RelativeSource Self}, Converter={conv:NumInRangeConverter From=2}}" />
+```
+```xml
+<!--  Show notice if angle if out of range-->
+<TextBlock Text="Angle will be fixed to value between 0 to 360 (not including)"
+    Visibility="{Binding Angle, Converter={conv:NumInRangeConverter From=0, Before=360, TrueValue=Collapsed, FalseValue=Visible}}"/>
+```
 ##### DateInRangeConverter
--- not yet documented --
+`WpfMart.Converters.NumInRangeConverter`  
+A `InRangeConverter` that used `DateTime` values as lower/upper bounds.  
+> It's adivices to specify the dates is xaml in universal format: 'yyyy-MM-dd'  
+
+```xml
+<!-- Notify user if there are no Windows update for Windows XP -->
+<TextBlock Text="Windows XP updates are only available after October 25, 2001 and before April 8, 2014"
+    Visibility="{Binding OSVersionDate, Converter={conv:DateInRangeConverter 
+        After=2001-10-25, Before=2014-04-8, TrueValue=Collapsed, FalseValue=Visible}}" />
+```  
+
+##### Chaining converters
+When used as markup-extension it's possible to chain another converter to convert from.  
+using the `FromConverter` property as follow:  
+```xml
+<!-- Key-code must start with a digit 1-9, so set background if valid or not.
+     If no key-code typed yet, set special background' -->
+<TextBlock Text="{Binding KeyCode}"
+  Background="{Binding KeyCode, Converter={conv:InRangeConverter From=1, Before=a,
+                NullValue=LightYellow, TrueValue=LightGreen, FalseValue=Coral,
+                FromConverter={conv:NullOrEmptyConverter TrueValue={x:Null}, FalseValue={conv:UseInputValue}}}" />
+```
+
+#### Recap examples
+```cs
+enum CustomerType { Regular, Repeating, Loyal, VIP, OurEmployee}
+```
+```xml
+<!-- 1. In case customer-type is between Loyal to VIP (CustomerType enum) allow it to redeem one-time 5% discount.
+     2. Coupon code string must start with a digit between 1 and 9. otherwise show 'invalid' background color.
+        if coupon code not entered (null or empty string) don't show as invalid background. -->
+<ListBox HorizontalContentAlignment="Stretch">
+  <CheckBox IsChecked="{Binding RedeemPreferredCustomerDiscount}" Content="Redeem valuable customer 5% discount"
+            Visibility="{Binding CustomerType, Converter={conv:InRangeConverter 
+                          From={x:Static local:CustomerType.Loyal}, 
+                          To={x:Static local:CustomerType.VIP},
+                          TrueValue=Visible, FalseValue=Collapsed}}" />
+            
+  <TextBlock Text="Coupon code:" />
+    
+  <TextBox Text="{Binding CouponCode, UpdateSourceTrigger=PropertyChanged}"
+           Background="{Binding CouponCode, Converter={conv:InRangeConverter NullValue={conv:UnsetValue},
+                          From=1, Before=a, TrueValue={conv:UnsetValue}, FalseValue=Coral,
+                          FromConverter={conv:NullOrEmptyConverter TrueValue={x:Null}, FalseValue={conv:UseInputValue}}}}" />
+</ListBox>
+<!-- 1. The discount CheckBox.Visibility bound to InRangeConverter which is set for a range of enum values for customer-type.
+        Looking at the enum possible values it appear that customer-types Regular and OurEmployee won't get the discount.
+     2. The coupon TextBox.Background bound to InRangeConverter which is set for a range of strings which
+        equals or greater then "1" but less than "a".
+        It's not set to be less or equals to "9" since string "9" is less than string "9coupon" which is also valid coupon code,
+        So since string "a" is one order greater than string "9", the converter upper bound is before "a"
+     2.1 In order to set background color only when condition met, BUT keep the default background (which can be anything) otherwise,
+         the converter uses {conv:UnsetValue} markup-extension which is simply shorthand for {x:Static DependencyProperty.UnsetValue},
+         that when returned by the converter, causes a dependency property to fallback to its default value.
+     2.1.1 Since coupon code can be null or empty, to which the converter will treat as out of range,
+           we configure the converter to treat null value as default background,
+           And ensure that in case it's empty string, and inner converter will convert it to null, to satisfy the outer converter. -->
+```
 
 --------------------------------------------------------------------------------
 
@@ -624,7 +760,7 @@ enum MachineState { None, On, Off, Faulted, Maintenance }
 
 
 ## NullOrEmptyConverter
-`WpfMart.Converters.MapConverter`  
+`WpfMart.Converters.NullOrEmptyConverter`  
 Checks if converted value is either null or empty string or empty collection (`IEnumerable`),  
 if equals, return value of `TrueValue` property, otherwise `FalseValue` property.  
 ```xml
@@ -681,8 +817,8 @@ using the `FromConverter` property. (see previous examples).
 
 ## **Multi Value Converters**
 ## InRangeMultiConverter
--- not published documented --
+-- not yet documented --
 
 ## EqualityMultiConverter
--- future release --
+-- not yet documented --
 
