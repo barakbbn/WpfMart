@@ -19,13 +19,13 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
   * *[Converter special values](#converter-special-values)*
   * [CastConverter](#castconverter)
   * [EqualityConverter](#equalityconverter)
+    * [EqualityToVisibilityConverter](#equalitytovisibilityconverter)
+    * [IsNotNullConverter](#isnotnullconverter)
+    * [NullToInvisibleConverter](#nulltoinvisibleconverter)  
   * ~~[InRangeConverter](#inrangeconverter)~~
     * ~~[NumInRangeConverter](#numinrangeconverter)~~
     * ~~[DateInRangeConverter](#dateinrangeconverter)~~
   * [MapConverter](#mapconverter)
-  * [NullConverter](#nullconverter)
-    * [IsNotNullConverter](#isnotnullconverter)
-    * [NullToInvisibleConverter](#nulltoinvisibleconverter)
   * ~~[NullOrEmptyConverter](#nulloremptyconverter)~~
     * ~~[IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)~~
     * ~~[NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)~~
@@ -411,7 +411,6 @@ if equals, return value of `TrueValue` property, otherwise `FalseValue` property
 ```xml
 <CheckBox IsChecked="{Binding SeekOrigin, CompareTo={x:Static sysio:SeekOrigin.Current}}" />
 ```
-
 ```cs
 enum MachineState { None, On, Off }
 ```
@@ -423,8 +422,13 @@ enum MachineState { None, On, Off }
     <x:Static Member="local:MachineState.On" />
     <x:Static Member="local:MachineState.Off" />
 </ComboBox>
-
 ```
+
+If the `CompareTo` property is not set, then by default it's `nul`l and therefore the converter can be used to check for null value.  
+```xml
+<CheckBox Content="Use default" IsChecked="{Binding SelectedItem, Converter={conv:EqualityConverter}}" />
+```
+
 ### IsNegative
 Converter can be negative, meaning checking if the value is not equals to the `CompareTo` property,  
 by setting `IsNegative` property to true.  
@@ -434,13 +438,15 @@ by setting `IsNegative` property to true.
     IsEnabled="{Binding Items.Count, RelativeSource={RelativeSource Self}, 
         Converter={conv:EqualityConverter IsNegative=True, CompareTo={z:Int 0}}}"   />
 ```
+
 ### null value
-In order to specially handle conversion from a null value,   
+In order to additionally handle conversion from a `null` value (in addition for comparing to desired value),   
 either set `NullValue` property to a desired value to return when converting a null value,  
 or set IsNullable to true and by that, NullValue property will have its default value of null.  
 (which is same as setting NullValue property to {x:Null}. )
-> if none of the above properties are set, null is not converted and compared to `CompareTo` property.  
-> Consider using the Binding's TargetNullValue instead.  
+> if none of the above properties are set, no special handling for `null` is done, and only comparing to `CompareTo` property.  
+> **Consider using the Binding's TargetNullValue instead.**  
+
 ### Chaining converters
 When used as markup-extension it's possible to chain another converter to convert from.  
 using the `FromConverter` property as follow:  
@@ -450,6 +456,26 @@ using the `FromConverter` property as follow:
   Converter={conv:EqualityConverter CompareTo='YES', TrueValue='Confirmed', FalseValue='---', NullValue='invalid'
   FromConverter={notmycon:ToUpperCaseConverter}}} />
 ```
+
+There are predefined converters of `EqualityConverter`, that are configured to common needs, such as:  
+##### EqualityToVisibilityConverter
+`WpfMart.Converters.EqualityToVisibilityConverterExtension`  
+Checks if converted value equals to the value of `CompareTo` property,  
+if equals, return value of `Visibility.Visible`, otherwise `Visibility.Collapsed`.  
+
+* The converter can be negative (checking it's not equals to `CompareTo` property), by setting the `IsNegative` property to `true`.  
+* The converter can return `Visibility.Hidden` instead of `Visibility.Collapsed`, by setting the `UseHidden` property to `true`.  
+
+##### IsNotNullConverter
+`WpfMart.Converters.IsNotNullConverterExtension`  
+ convert a null to `false` and non-null value to `true`.  
+
+##### NullToInvisibleConverter
+`WpfMart.Converters.NullToInvisibleConverterExtension`  
+Converts a null to `Visiblity.Collapsed`, otherwise to `Visiblity.Visible`.  
+
+--------------------------------------------------------------------------------
+
 
 ## InRangeConverter
 ##### NumInRangeConverter
@@ -514,6 +540,7 @@ In order to map a null to a value, it's not possible to set it as a key in a dic
 ~~`<conv:MapConverter><sys:String x:Key={x:Null}>No value</sys:String></conv:MapConverter>`~~  
 For this purpose use the `NullValue` property to set the value to return when converting from null.  
 > Consider using the Binding's TargetNullValue instead.  
+
 #### Examlpes
 ```cs
 enum MachineState { None, On, Off, Faulted, Maintenance }
@@ -592,50 +619,6 @@ enum MachineState { None, On, Off, Faulted, Maintenance }
                      Converter={StaticResource ForegroundToTextConverter}}"
    Foreground="{Binding MachineState, Mode=OneWay, Converter={StaticResource MachineStateToForeground}}" />
 ```
-
---------------------------------------------------------------------------------
-
-
-## NullConverter
-`WpfMart.Converters.NullConverter`  
-Converts from a null value to another value specified by properties `TrueValue` and `FalseFalue`.
-
-NullConverter is usually not useful, as other converters can achieve same abilities, but it's most common usages are:  
-* return true/false in case input value is null or not - this is the default behavior.
-
-  ```xml
-  <CheckBox Content="Use default" IsChecked="{Binding SelectedItem, Converter={conv:NullConverter}}" /> 
-  ```
-* convert null value to something else but in case the input value is not null, keep it as is without converting it. 
-   
-   > Note: prefer using the Binding's TargetNullValue instead, unless requiring more advanced usages.
-   ```xml
-   <!-- example where NullConverter should be avoided -->
-   <ComboBox SelectedItem="{Binding SelectedTraceLevel, TargetNullValue={x:Static diag:TraceLevel.Off}}" />
-   ```
-   ```xml
-   <Window.Resources>
-     <!-- Instead of setting same TargetNullValue on all bindings, reuse it thru NullConverter-->
-     <conv:NullConverter x:Key="NullToDefaultColor" TrueValue="{conv:UnsetValue}" FalseValue="{conv:UseInputValue}" />
-   </Window.Resources>
-   <!-- --This could be achieved also by style -->
-   <RadioButton Background="{Binding ColorA, Converter={StaticResource NullToDefaultColor}}" />
-   <RadioButton Background="{Binding ColorB, Converter={StaticResource NullToDefaultColor}}" />
-   <RadioButton Background="{Binding ColorC, Converter={StaticResource NullToDefaultColor}}" />
-   ```
-* return true in case input value is not null, false otherwise. (negative to option 1 above).  
-   This can be achieved by setting the `IsNegative` property to true. 
-   There is also a predefined `IsNotNullConverterExtension"` converter used to perform negative conversion.
-
-> Note: If it's required to check if value is *null or empty string/collection*, use `NullOrEmptyConverter` instead.  
-
-##### IsNotNullConverter
-`WpfMart.Converters.IsNotNullConverterExtension`  
-Pre configured converter, to convert a null to `false` and non-null value to `true`.  
-##### NullToInvisibleConverter
-`WpfMart.Converters.NullToInvisibleConverterExtension`  
-Pre configured converter, to convert a null to `Visiblity.Collapsed`, otherwise to` Visiblity.Visible`.
-
 
 --------------------------------------------------------------------------------
 
