@@ -9,6 +9,7 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
   * [Casting markup-extension](#casting-markup-extension)
   * [EnumValues markup-extension](#enumvalues-markup-extension)
 * [Value Converters](#value-converters)
+  * [GroupConverter](#groupconverter)  
   * [BoolConverter](#boolconverter)
     * [NegativeBoolConverter](#negativeboolconverter)
   * [BoolToVisibilityConverter](#booltovisibilityconverter)
@@ -16,7 +17,6 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * [TrueToHiddenConverter](#truetohiddenconverter)
     * [FalseToHiddenConverter](#falsetohiddenconverter)
   * *[Converter special values](#converter-special-values)*
-  * [GroupConverter](#groupconverter)  
   * [CastConverter](#castconverter)
   * [EqualityConverter](#equalityconverter)
     * [EqualityToVisibilityConverter](#equalitytovisibilityconverter)
@@ -29,8 +29,8 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
   * [NullOrEmptyConverter](#nulloremptyconverter)
     * [IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)
     * [NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)
-* ~~[Multi Value Converters](#multi-value-converters)~~
-  * ~~[InRangeMultiConverter](#inrangemulticonverter)~~
+* [Multi Value Converters](#multi-value-converters)
+  * [InRangeMultiConverter](#inrangemulticonverter)
   * ~~[EqualityMultiConverter](#equalitymulticonverter)~~
     
 --------------------------------------------------------------------------------
@@ -821,12 +821,130 @@ Convert a null or empty string/collection to `Visibility.Collapsed`, otherwise `
 This converter also has the ability to chain another converter to convert from.  
 using the `FromConverter` property. (see previous examples).  
 
----
+--------------------------------------------------------------------------------
 
 
 ## **Multi Value Converters**
 ## InRangeMultiConverter
--- not yet documented --
+`WpfMart.Converters.InRangeMultiConverter`  
+Check if value is in range of lower and/or upper bounds.  
+if in range, returns `TrueValue` property , otherwise `FalseValue` property.  
+
+The array of values passed to the converter's Convert method is treated as follow:  
+* The value to check if in range - values[0]  
+* By default values[1] is the lower bound of the range and values[2] is the upper bound of the range.
+
+> The converter is very similar to [InRangeConverter](*inrangeconverter)  
+> execpt that the lower/upper bounds are provided using `Binding` inside a `MultiBinding`.
+
+```xml
+<TextBlock Text="{Binding MeasuredValue}" >
+  <TextBlock.Background>
+    <MultiBinding Converter="{conv:InRangeMultiConverter TrueValue=Green, FalseValue=Red}">
+      <Binding Path="MeasuredValue" />
+      <Binding Path="MinAllowedValue" />
+      <Binding Path="MaxAllowedValue" />
+    </MultiBinding>
+  </TextBlock.Background>
+</TextBlock>
+```
+
+To specify if lower/upper bounds are inclusive or exclusive,  
+set properties `LowerInclusive` and/or `UpperInclusive` to `true` or `false`.  
+By default the bounds are inclusive.  
+```xml
+<TextBlock Text="{Binding MeasuredValue}" >
+  <TextBlock.Background>
+    <MultiBinding Converter="{conv:InRangeMultiConverter LowerInclusive=False,  UpperInclusive=False, TrueValue=Green, FalseValue=Red}">
+      <Binding Path="MeasuredValue" />
+      <Binding Path="LowerOutOfRangeValue" />
+      <Binding Path="UpperOutOfRangeValue" />
+    </MultiBinding>
+  </TextBlock.Background>
+</TextBlock>
+```
+
+The more interesting aspect of the converter is to perform **greater-than/less-than** conditions  
+by only specifying one of the bounds (lower or upper) by binding to only a value and a single limit,   
+and **in addition** set only **one** of the properties `LowerInclusive` or `UpperInclusive` to indicate which limit to use.  
+(otherwise it defaults to lower inclusive).  
+
+```xml
+<CheckBox Content="Passed the test" IsEnabled="False">
+  <CheckBox.IsChecked>
+    <MultiBinding Converter="{conv:InRangeMultiConverter LowerInclusive=True}" >
+      <Binding Path="Grade" /> <!-- value to check if in range -->
+      <Binding Path="MinGrade" /> <!-- lower limit inclusive -->
+    </MultiBinding>
+  </CheckBox.IsChecked>
+</CheckBox>
+```
+
+* Setting only `LowerInclusive` to `True` performs Gearter than or Equals to. setting to `False` performs Greater than.  
+* Setting only `UpperInclusive` to `True` performs Less than or Equals to. setting to `False` performs Less than.  
+
+> The above is true only if binding to 1 limit. if binding to 2 limits (see very first example),  
+> then in-range check is done on both limits.
+
+```xml
+<StackPanel Orientation="Horizontal">
+  <DatePicker x:Name="FromDatePicker" />
+  <DatePicker x:Name="ToDatePicker" />
+  <TextBlock Text="From date should be less than To date">
+    <TextBlock.Visibility>
+      <MultiBinding Converter="{conv:InRangeMultiConverter UpperInclusive=False, TrueValue=Collapsed, FalseValue=Visible}" >
+        <Binding Path="SelectedDate" ElementName="FromDatePicker" /> <!-- value to check if in range -->
+        <Binding Path="SelectedDate" ElementName="ToDatePicker" /> <!-- upper limit, since UpperInclusive property is set -->
+      </MultiBinding>
+    </TextBlock.Visibility>
+  </TextBlock>
+</StackPanel>
+```
+
+### IsNegative
+Converter can be negative, meaning checking if the value is not in range,  
+by setting `IsNegative` property to true.  
+> Note: `null` value is considered out of range.  
+
+```cs
+enum CustomerType { Regular, Repeating, Loyal, Vip, OurEmployee }
+```
+```xml
+<Window.Resources>
+  <conv:InRangeMultiConverter x:Key="IsRangeToVisibility" LowerInclusive="True" TrueValue="Visible", FalseValue="Collapsed" />
+</Window.Resources>
+<Button Content="Try again">
+  <Button.Visibility>
+    <!-- Setting ConverterParameter="True" is another way to make the converter negative -->
+    <MultiBinding Converter="{StaticResource IsRangeToVisibility}" ConverterParameter="True" >
+      <Binding Path="Grade" />
+      <Binding Path="MinGrade" />
+    </MultiBinding>
+  </Button.Visibility>
+</Button>
+
+<TextBlock Content="You passed the test">
+  <TextBlock.Visibility>
+    <MultiBinding Converter="{StaticResource IsRangeToVisibility}" >
+      <Binding Path="Grade" />
+      <Binding Path="MinGrade" />
+    </MultiBinding>
+  </TextBlock.Visibility>
+</TextBlock>
+```
+
+### null value
+In order to specially handle conversion from a `null` value,   
+either set `NullValue` property to a desired value to return when converting a null value,  
+or set `IsNullable` to true and by that, `NullValue` property will have its default value of `null`.  
+(which is same as setting `NullValue` property to `{x:Null}`. )  
+> if none of the above properties are set, no special handling for `null` is done and it's considered not in range,  
+> but resulting value depends on the `IsNegative` property.  
+> **Consider using the Binding's TargetNullValue instead.**  
+
+
+--------------------------------------------------------------------------------
+
 
 ## EqualityMultiConverter
 -- not yet documented --
