@@ -1,5 +1,5 @@
 # WpfMart Help
-Help on [WpfMart](https://www.nuget.org/packages/WpfMart/) nuget packge.
+Help on [WpfMart](https://www.nuget.org/packages/WpfMart/) NuGet Package.
 
 # WpfMart
 A set of WPF helpers and utilities such as value converters, markup-extensions, behaviors, etc.
@@ -30,8 +30,8 @@ A set of WPF helpers and utilities such as value converters, markup-extensions, 
     * [IsNotNullOrEmptyConverter](#isnotnulloremptyconverter)
     * [NullOrEmptyToInvisibleConverter](#nulloremptytoinvisibleconverter)
 * [Multi Value Converters](#multi-value-converters)
-  * [InRangeMultiConverter](#inrangemulticonverter)
-  * ~~[EqualityMultiConverter](#equalitymulticonverter)~~
+    * [EqualityMultiConverter](#equalitymulticonverter)
+    * [InRangeMultiConverter](#inrangemulticonverter)
     
 --------------------------------------------------------------------------------
 
@@ -48,7 +48,6 @@ Provides type conversion to the specified type, mainly from a string written in 
 Used as shorthand for writing values of primitive type in XAML in places the expected type is `System.Object`.
 
 > Please note that it's not necessary to do any casting when assigning to a Property of the desired type.  
-
 > ```xml
 <!-- no need casting since property type is int (not object) and WPF will convert it for us -->
 <ComboBox SelectedIndex="1" />
@@ -60,8 +59,8 @@ Used as shorthand for writing values of primitive type in XAML in places the exp
 <ComboBox Tag="1" />
 ```
 
-The `CastExtension` is used by specifying its target type either thru constructor or its ToType property. 
-> Whenever possible use the more speccific cast markups such as 
+The `CastExtension` is used by specifying its target type either through constructor or its ToType property. 
+> Whenever possible use the more specific cast markups such as 
 > `BoolExtension`, `IntExtension`, `DoubleExtension`, etc. 
 > instead of the general purpose `CastExtension`
 
@@ -250,11 +249,11 @@ enum MachineState { None, On, Off }
 
 ## BoolToVisibilityConverter
 `WpfMart.Converters.BoolToVisibilityConverter`  
-The difference betwen this converter and built-in WPF converter `System.Windows.Data.BooleanToVisibilityConverter`  
+The difference between this converter and built-in WPF converter `System.Windows.Data.BooleanToVisibilityConverter`  
 Is that with this converter has additional abilities as follow:  
 
 #### Hidden instead of Collapsed
-it's possible to to use `Visibility.Hidden` instead of `Visibility.Collapsed`  
+it's possible to use `Visibility.Hidden` instead of `Visibility.Collapsed`  
 
 ```xml
 <Border x:Name="ContentPlaceHolder" Visibility="{Binding IsMissings, Converter={conv:BoolToVisibilityConverter UseHidden=True}}" />
@@ -685,7 +684,6 @@ In order to map a `null` to a value, it's not possible to set it as a key in a d
 For this purpose use the `NullValue` property to set the value to return when converting from `null`.  
 > Consider using the Binding's TargetNullValue instead.  
 
-#### Examlpes
 ```cs
 enum MachineState { None, On, Off, Faulted, Maintenance }
 ```
@@ -701,7 +699,7 @@ enum MachineState { None, On, Off, Faulted, Maintenance }
 ```
 ### Converting back
 The `MapConverter` also performs convert-back.  
-To specify a fallback value in case convert-back cannot find vaue in the dictionary,  
+To specify a fallback value in case convert-back cannot find value in the dictionary,  
 use the `ConvertBackFallbackValue` property. by default it cancel the conversion (`Binding.DoNothing`).  
 > in case more than one key mapped to the same value,  
 > The resulting key from convert-back can be any of them.
@@ -709,7 +707,7 @@ use the `ConvertBackFallbackValue` property. by default it cancel the conversion
 
 ### Mapping to another converter
 If a mapped value in the dictionary is a value-converter, by default it will be used in order to produce the final value.  
-*to disalbe this ability, set `ConvertAlsoFoundValueConverter` property to false.*  
+*to disable this ability, set `ConvertAlsoFoundValueConverter` property to false.*  
 *Also be aware that performing convert-back won't work if involving embedded value-converter.*  
 
 ```xml
@@ -789,7 +787,7 @@ In order to check only for empty string/collection, change the `Mode` property f
 
 
 ### IsNegative
-Converter can be negative, and check if the value is niether null nor empty string/collection,  
+Converter can be negative, and check if the value is neither null nor empty string/collection,  
 by setting `IsNegative` property to `true`.  
 
 ```xml
@@ -825,6 +823,60 @@ using the `FromConverter` property. (see previous examples).
 
 
 ## **Multi Value Converters**
+## EqualityMultiConverter
+`WpfMart.Converters.EqualityMultiConverter`  
+Checks equality of two values provided by bindings.  
+(The array of values passed to the converter's Convert method contains the two values)  
+if equals, return value of `TrueValue` property, otherwise `FalseValue` property.  
+
+```xml
+<CheckBox IsEnabled="False" Content="Reached max attempts">
+  <CheckBox.IsChecked>
+    <MultiBinding Converter="{conv:EqualityMultiConverter}" >
+      <Binding Path="RetryCount" />
+      <Binding Path="MaxRetries" />
+    </MultiBinding>
+  </CheckBox.IsChecked>
+</CheckBox>
+```
+
+
+
+```xml
+<StackPanel>
+  <ComboBox x:Name="SaladDressing1" ItemsSource="{Binding AvailableSaladDressing}"/>
+  <ComboBox x:Name="SaladDressing2" ItemsSource="{Binding AvailableSaladDressing}" />
+  
+  <TextBlock Text="Please notice you picked the same salad dressing for both options" >
+    <TextBlock.Visibility>
+      <MultiBinding Converter="{conv:EqualityMultiConverter TrueValue=Collapsed, FalseValue=Visible}" >
+        <Binding Path="SelectedItem" ElementName="SaladDressing1" TargetNullValue="DiffFromOption2" />
+        <Binding Path="SelectedItem" ElementName="SaladDressing2" TargetNullValue="DiffFromOption1" />
+      </MultiBinding>
+    </TextBlock.Visibility>
+  </TextBlock>
+</StackPanel>
+```
+
+
+### IsNegative
+Converter can be negative, meaning checking if values are not equals to each other,  
+by setting `IsNegative` property to true.  
+
+```xml
+<TextBox Text="{Binding CouponCode}" >
+  <TextBox.IsReadOnly>
+    <MultiBinding Converter="{conv:EqualityMultiConverter IsNegative=True}" >
+      <Binding Path="CouponsUsedsoFar" />
+      <Binding Path="MaxCouponsAllowed" />
+    </MultiBinding>
+  </TextBox.IsReadOnly>
+</TextBox>
+```
+
+--------------------------------------------------------------------------------
+
+
 ## InRangeMultiConverter
 `WpfMart.Converters.InRangeMultiConverter`  
 Check if value is in range of lower and/or upper bounds.  
@@ -835,7 +887,7 @@ The array of values passed to the converter's Convert method is treated as follo
 * By default values[1] is the lower bound of the range and values[2] is the upper bound of the range.
 
 > The converter is very similar to [InRangeConverter](*inrangeconverter)  
-> execpt that the lower/upper bounds are provided using `Binding` inside a `MultiBinding`.
+> except that the lower/upper bounds are provided using `Binding` inside a `MultiBinding`.
 
 ```xml
 <TextBlock Text="{Binding MeasuredValue}" >
@@ -880,7 +932,7 @@ and **in addition** set only **one** of the properties `LowerInclusive` or `Uppe
 </CheckBox>
 ```
 
-* Setting only `LowerInclusive` to `True` performs Gearter than or Equals to. setting to `False` performs Greater than.  
+* Setting only `LowerInclusive` to `True` performs Greater than or Equals to. setting to `False` performs Greater than.  
 * Setting only `UpperInclusive` to `True` performs Less than or Equals to. setting to `False` performs Less than.  
 
 > The above is true only if binding to 1 limit. if binding to 2 limits (see very first example),  
@@ -944,8 +996,3 @@ or set `IsNullable` to true and by that, `NullValue` property will have its defa
 
 
 --------------------------------------------------------------------------------
-
-
-## EqualityMultiConverter
--- not yet documented --
-
