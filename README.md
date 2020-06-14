@@ -48,7 +48,7 @@ Provides type conversion to the specified type, mainly from a string written in 
 Used as shorthand for writing values of primitive type in XAML in places the expected type is `System.Object`.
 
 > Please note that it's not necessary to do any casting when assigning to a Property of the desired type.  
-> ```xml
+```xml
 <!-- no need casting since property type is int (not object) and WPF will convert it for us -->
 <ComboBox SelectedIndex="1" />
 <!-- wrongly using the casting markup-extension, it will work, but don't. -->
@@ -431,7 +431,7 @@ enum MachineState { None, On, Off }
 </ComboBox>
 ```
 
-If the `CompareTo` property is not set, then by default it's `nul`l and therefore the converter can be used to check for null value.  
+If the `CompareTo` property is not set, then by default it's `null` and therefore the converter can be used to check for null value.  
 ```xml
 <CheckBox Content="Use default" IsChecked="{Binding SelectedItem, Converter={conv:EqualityConverter}}" />
 ```
