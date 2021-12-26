@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Windows;
-using System.Windows.Data;
 using WpfMart.Converters;
 using System.Globalization;
 using System.Linq;

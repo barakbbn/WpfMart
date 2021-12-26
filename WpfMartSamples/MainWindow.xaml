@@ -6,7 +6,9 @@
         xmlns:conv="clr-namespace:WpfMart.Converters;assembly=WpfMart"
         xmlns:local="clr-namespace:WpfMartSamples"
         xmlns:z="clr-namespace:WpfMart.Markup;assembly=WpfMart"
-        Title="MainWindow"  Width="640"
+        Title="MainWindow"
+        Width="640"
+        Name="WpfMartSamples"
         >
     <Window.DataContext>
         <local:MainWindowViewModel />

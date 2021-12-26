@@ -66,8 +66,8 @@ namespace WpfMart.Utils
             {
                 value = (int)(char)value;
             }
-
-            if (value is IConvertible convertible && _convertibleInterfaceTypes.Contains(targetType))
+            var convertible = value as IConvertible;
+            if (convertible != null && _convertibleInterfaceTypes.Contains(targetType))
             {
                 try
                 {
