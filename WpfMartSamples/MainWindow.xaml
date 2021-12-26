@@ -1,0 +1,430 @@
+﻿<Window x:Class="WpfMartSamples.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:glob="clr-namespace:System.Globalization;assembly=mscorlib"
+        xmlns:conv="clr-namespace:WpfMart.Converters;assembly=WpfMart"
+        xmlns:local="clr-namespace:WpfMartSamples"
+        xmlns:z="clr-namespace:WpfMart.Markup;assembly=WpfMart"
+        Title="MainWindow"  Width="640"
+        >
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/WpfMart;component/Converters/Converters.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <!--<z:Cast x:Key="True" Type="{x:Type sys:Boolean}" >True</z:Cast>-->
+            <!-- Equality converters -->
+            <conv:EqualityConverter x:Key="NegativeBoolConverter" IsNegative="True" IsNullable="True" />
+            <conv:EqualityConverter x:Key="IsNullConverter" />
+            <conv:EqualityConverter x:Key="NullToEmptyStringConverter" 
+                                    CompareTo="{x:Null}" 
+                                    TrueValue="" 
+                                    FalseValue="{conv:UseInputValue}" />
+            <conv:EqualityConverter x:Key="NullToNaNConverter"
+                                    CompareTo="{x:Null}"
+                                    TrueValue="{x:Static sys:Double.NaN}"
+                                    FalseValue="{conv:UseInputValue}" />
+
+
+            <conv:EqualityConverter x:Key="NanToEmptyStringConverter" 
+                                    CompareTo="{x:Static sys:Double.NaN}" 
+                                    TrueValue=""
+                                    FalseValue="{conv:UseInputValue}" />
+
+            <conv:EqualityConverter x:Key="machineStateToText" 
+                CompareTo="{x:Static local:MachineState.None}"
+                TrueValue="---"
+                FalseValue="{conv:UseInputValue}"/>
+
+            <!-- Boolean converters -->
+            <conv:BoolConverter x:Key="BoolToOnOffConverter"
+                                   TrueValue="On"
+                                   FalseValue="Off" />
+            <conv:BoolConverter x:Key="IsCheckedToMachineState" 
+                                   TrueValue="{x:Static local:MachineState.On}"
+                                   FalseValue="{x:Static local:MachineState.Off}" />
+            <conv:BoolConverter x:Key="NegativeIsChecked" IsNegative="True" NullValue="{x:Null}"/>
+            <conv:BoolConverter x:Key="EnumToCheckStateConverter" 
+                                    IsReversed="True"
+                                    TrueValue="{x:Static local:MachineState.On}" 
+                                    FalseValue="{x:Static local:MachineState.Off}"
+                                    NullValue="{x:Static local:MachineState.None}" />
+
+            <!-- Group Converter -->
+            <conv:GroupConverter x:Key="group1" >
+                <conv:BoolConverter />
+                <conv:EqualityConverter />
+            </conv:GroupConverter>
+
+            <conv:GroupConverter x:Key="NullSafeNumberToMyEnum">
+                <conv:TargetNullValueConverter Value="{z:Int 0}" />
+                <conv:CastConverter ToType="{z:Nullable local:MachineState}" />
+            </conv:GroupConverter>
+
+            <!-- Max Converter -->
+            <conv:MapConverter x:Key="machineStateToNullBool" FallbackValue="{x:Null}" ConvertBackFallbackValue="{x:Static local:MachineState.None}" >
+                <sys:Boolean x:Key="{x:Static local:MachineState.On}" >True</sys:Boolean>
+                <sys:Boolean x:Key="{x:Static local:MachineState.Off}" >False</sys:Boolean>
+            </conv:MapConverter>
+
+            <conv:MapConverter x:Key="machineStateToForeground" FallbackValue="{x:Static DependencyProperty.UnsetValue}">
+                <SolidColorBrush x:Key="{x:Static local:MachineState.On}" Color="Green" />
+                <SolidColorBrush x:Key="{x:Static local:MachineState.Off}" Color="Red" />
+                <SolidColorBrush x:Key="{x:Static local:MachineState.Faulted}" Color="Orange" />
+            </conv:MapConverter>
+
+            <conv:MapConverter x:Key="foregroundToTextConverter" NullValue="{x:Null}" >
+                <sys:String x:Key="#FF008000" >Green</sys:String>
+                <sys:String x:Key="#FFFF0000" >Red</sys:String>
+                <sys:String x:Key="#FFFFA500" >Orange</sys:String>
+
+                <conv:MapConverter.FallbackValue>
+                    <Rectangle Width="50" Height="2" StrokeThickness="2" Stroke="Blue" StrokeDashArray="1,2,1,2" Margin="1,7" />
+                </conv:MapConverter.FallbackValue>
+            </conv:MapConverter>
+
+            <conv:MapConverter x:Key="GregorianCalendarTypesToText" FallbackValue="-----">
+                <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.Localized}" >Local</sys:String>
+                <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.USEnglish}" >English</sys:String>
+                <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.Arabic}"    >Arabic</sys:String>
+            </conv:MapConverter>
+
+            <!-- BoolToVisibilityConverter -->
+            <!--<conv:BoolToVisibilityConverter x:Key="TrueToVisible" />
+            <conv:BoolToVisibilityConverter x:Key="TrueToCollapsed" IsNegative="True" />
+            <conv:BoolToVisibilityConverter x:Key="TrueToHidden" UseHidden="True" IsNegative="True" />-->
+
+            <conv:BoolToVisibilityConverter x:Key="TrueToVisible" />
+            <conv:BoolToVisibilityConverter x:Key="TrueToCollapsed" IsNegative="True" />
+            <conv:BoolToVisibilityConverter x:Key="TrueToHidden" IsNegative="True" UseHidden="True"/>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="5" Tag="{z:Cast 1, sys:Int32}" ShowGridLines="True">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <CheckBox x:Name="MachineStateToThreeStateCheck" Grid.Row="0" Grid.Column="0"
+            IsThreeState="True"
+            IsChecked="{Binding MachineState, Converter={StaticResource machineStateToNullBool}}"
+            Content="{Binding Foreground, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource foregroundToTextConverter}}"
+            Foreground="{Binding MachineState, Mode=OneWay, Converter={StaticResource machineStateToForeground}}" />
+
+        <ComboBox x:Name="enumValues" Grid.Row="1" Grid.Column="0"
+                  VerticalAlignment="Center"
+                  Tag="{Binding NullIntProperty, Converter={StaticResource NullSafeNumberToMyEnum}}"
+                  IsTabStop="{Binding NullBoolProperty, Converter={conv:IsNotNullConverter}}"
+                  IsReadOnly="{Binding NullBoolProperty, Converter={conv:EqualityConverter}}"
+                  ItemsSource="{z:EnumValues local:MachineState, Mode=Description ,Exclude=None}" 
+                  />
+
+        <Grid x:Name="IsNullOrEmpty" Grid.Row="2" Grid.Column="0" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="1" Grid.Row="0" Text="Is null or empty?" TextDecorations="Underline"/>
+
+            <TextBox x:Name="text" Grid.Column="0" Grid.Row="1" />
+            <TextBlock Grid.Column="1" Grid.Row="1" 
+                       Text="{Binding Text, ElementName=text, Converter={conv:NullOrEmptyConverter}}"/>
+        </Grid>
+
+        <Grid x:Name="BoolToVisibility" Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <CheckBox Grid.RowSpan="3" 
+                      VerticalAlignment="Center" 
+                      Padding="5"
+                      IsChecked="{Binding BoolProperty}" />
+            <TextBlock Grid.Column="1" Grid.Row="0" Padding="5" >
+                <Hyperlink NavigateUri="https://github.com/barakbbn/WpfMartHelp" >Show</Hyperlink>
+            </TextBlock>
+            <TextBlock Grid.Column="1" Grid.Row="1" Padding="5" Text="Collapse" />
+            <TextBlock Grid.Column="1" Grid.Row="2" Padding="5" Text="Hide" />
+
+            <Border Grid.Column="2" Grid.Row="0" BorderThickness="2" VerticalAlignment="Center"
+                    BorderBrush="{Binding StringProperty, Converter={conv:NullOrEmptyConverter TrueValue=HotPink, FalseValue=Green}}">
+                <TextBox Text="{Binding StringProperty}" Visibility="{Binding BoolProperty, Mode=OneWay, Converter={StaticResource TrueToVisible}}"/>
+            </Border>
+            <Border Grid.Column="2" Grid.Row="1" BorderThickness="2" BorderBrush="HotPink" VerticalAlignment="Center" >
+                <ContentControl Content="You can see me" Visibility="{Binding BoolProperty, Mode=OneWay,Converter={StaticResource TrueToCollapsed}}"/>
+            </Border>
+            <Border Grid.Column="2" Grid.Row="2" BorderThickness="2" BorderBrush="HotPink" VerticalAlignment="Center">
+                <ContentControl Content="You can see me" Visibility="{Binding BoolProperty, Mode=OneWay,Converter={StaticResource TrueToHidden}}"/>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="BoolToVisibility2" Grid.Row="1" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition  Height="*"/>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBox Grid.RowSpan="3" 
+                      VerticalAlignment="Center" 
+                      Padding="5"
+                      Text="{Binding StringProperty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Column="1" Grid.Row="0" Padding="5" Text="Show" />
+            <TextBlock Grid.Column="1" Grid.Row="1" Padding="5" Text="Collapse" />
+            <TextBlock Grid.Column="1" Grid.Row="2" Padding="5" Text="Hide" />
+
+            <Border Grid.Column="2" Grid.Row="0" BorderThickness="2" BorderBrush="HotPink" VerticalAlignment="Center">
+                <ContentControl 
+                    Content="You can see me" 
+                    Visibility="{Binding StringProperty, 
+                        Mode=OneWay, 
+                        Converter={conv:BoolToVisibilityConverter FromConverter={conv:BoolConverter IsNegative=True, FromConverter={conv:NullOrEmptyConverter}}}}"/>
+            </Border>
+            <Border Grid.Column="2" Grid.Row="1" BorderThickness="2" BorderBrush="HotPink" VerticalAlignment="Center" >
+                <ContentControl 
+                    Content="You can see me" 
+                    Visibility="{Binding StringProperty, 
+                        Mode=OneWay, 
+                        Converter={conv:BoolToVisibilityConverter FromConverter={conv:NullOrEmptyConverter}}}"/>
+            </Border>
+            <Border Grid.Column="2" Grid.Row="2" BorderThickness="2" BorderBrush="HotPink" VerticalAlignment="Center">
+                <ContentControl 
+                    Content="You can see me" 
+                    Visibility="{Binding StringProperty, 
+                        Mode=OneWay, 
+                        Converter={conv:BoolToVisibilityConverter UseHidden=True, FromConverter={conv:NullOrEmptyConverter}}}"/>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Grid.Column="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ComboBox  x:Name="combobox" Grid.Column="1" VerticalAlignment="Top"
+                ItemsSource="{Binding DevicesList}" 
+                SelectedItem="{Binding CurrentMachineState, TargetNullValue={x:Static local:MachineState.None}}"
+                IsReadOnly="{Binding DevicesList, Converter={conv:NullOrEmptyConverter}}" />
+        </Grid>
+
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Slider Value="{Binding NullDoubleProperty, TargetNullValue={x:Static sys:Double.NaN}}" Minimum="0" Maximum="100"/>
+                <TextBlock Text="{Binding NullDoubleProperty, StringFormat={}{0:0.00}}" HorizontalAlignment="Center" IsHitTestVisible="False"/>
+                <TextBlock Grid.Row="1" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="[1,99]" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter From=1, To=99, TrueValue=Green, FalseValue=Red}}"/>
+                <TextBlock Grid.Row="2" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="(1,99)" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter After=1, Before=99, TrueValue=Green, FalseValue=Red}}"/>
+                <TextBlock Grid.Row="3" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="[0,100)" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter From=0, Before=100, TrueValue=Green, FalseValue=Red}}"/>
+                <TextBlock Grid.Row="4" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="(0,100]" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter After=0, To=100, TrueValue=Green, FalseValue=Red}}" />
+                <TextBlock Grid.Row="5" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="&gt; 50.0" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter After=50, TrueValue=Green, FalseValue=Red}}" />
+                <TextBlock Grid.Row="6" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="&lt; 50.0" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter Before=50, TrueValue=Green, FalseValue=Red}}" />
+
+            </Grid>
+
+            <Grid Grid.Row="0" Grid.Column="1">
+                <ListBox HorizontalContentAlignment="Stretch">
+                    <TextBlock Text="Coupon code:" />
+                    <TextBox Text="{Binding CouponCode, UpdateSourceTrigger=PropertyChanged}"
+                        IsEnabled="{Binding SoftwareVersion, Converter={conv:InRangeConverter From=2.5}}" 
+                        Background="{Binding CouponCode,
+                            Converter={conv:InRangeConverter NullValue={conv:UnsetValue},
+                                From=1, Before=a, TrueValue={conv:UnsetValue}, FalseValue=Coral,
+                                FromConverter={conv:NullOrEmptyConverter TrueValue={x:Null}, FalseValue={conv:UseInputValue}}}}" />
+
+                    <CheckBox IsChecked="{Binding RedeemValuableCustomerDiscount}" Content="Redeem valuable customer 5% discount"
+                        Visibility="{Binding CustomerType, Converter={conv:InRangeConverter 
+                            From={x:Static local:CustomerType.Loyal}, 
+                            To={x:Static local:CustomerType.Vip},
+                            TrueValue=Visible, FalseValue=Collapsed}}" />
+                </ListBox>
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <DatePicker SelectedDate="{Binding DateProperty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Row="1" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="From 2016-10-01 08:00"
+                    Background="{Binding DateProperty, Converter={conv:DateInRangeConverter From='2016-10-01 08:00', TrueValue=Green, FalseValue=Red}}">
+                </TextBlock>
+
+                <TextBlock Grid.Row="2" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="After 2016-10-01 23:59:59.999"
+                    Background="{Binding DateProperty, Converter={conv:DateInRangeConverter After='2016-10-01 23:59:59.999', TrueValue=Green, FalseValue=Red}}">
+                </TextBlock>
+
+                <TextBlock Grid.Row="3" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="From 2016-01-01 and before 2017-01-01"
+                    Background="{Binding DateProperty, Converter={conv:DateInRangeConverter From=2016-01-01, Before=2017-01-01, TrueValue=Green, FalseValue=Red}}">
+                </TextBlock>
+
+                <TextBlock Grid.Row="4" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="After 2016-09-01 till 2016-30-09" 
+                    Background="{Binding DateProperty, Converter={conv:DateInRangeConverter After=2016-09-01, To=2016-09-30, TrueValue=Green, FalseValue=Red}}">
+                </TextBlock>
+
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <DatePicker x:Name="MinDatePicker" Padding="1" SelectedDate="2016-10-01"/>
+                    <DatePicker SelectedDate="{Binding DateProperty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <DatePicker x:Name="MaxDatePicker" Padding="1" SelectedDate="2016-10-31"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="1" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="From" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="DateProperty" />
+                            <Binding Path="SelectedDate" ElementName="MinDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="2" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="After" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter LowerInclusive=False, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="DateProperty" />
+                            <Binding Path="SelectedDate" ElementName="MinDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="3" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="To" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter UpperInclusive=True, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="DateProperty" />
+                            <Binding Path="SelectedDate" ElementName="MaxDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="4" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="Before" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter UpperInclusive=False, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="DateProperty" />
+                            <Binding Path="SelectedDate" ElementName="MaxDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="5" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="After - To" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter LowerInclusive=False, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="DateProperty" />
+                            <Binding Path="SelectedDate" ElementName="MinDatePicker" />
+                            <Binding Path="SelectedDate" ElementName="MaxDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="6" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="From - Before" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter UpperInclusive=False, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="DateProperty" />
+                            <Binding Path="SelectedDate" ElementName="MinDatePicker" />
+                            <Binding Path="SelectedDate" ElementName="MaxDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="7" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="Min &lt; Max" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter UpperInclusive=False, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="SelectedDate" ElementName="MinDatePicker" />
+                            <Binding Path="SelectedDate" ElementName="MaxDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+                <TextBlock Grid.Row="8" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
+                    Text="Min &lt;= Max" >
+                    <TextBlock.Background>
+                        <MultiBinding  Converter="{conv:InRangeMultiConverter UpperInclusive=True, TrueValue=Green, FalseValue=Red}">
+                            <Binding Path="SelectedDate" ElementName="MinDatePicker" />
+                            <Binding Path="SelectedDate" ElementName="MaxDatePicker" />
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
+
+            </Grid>
+        </Grid>
+
+    </Grid>
+</Window>
