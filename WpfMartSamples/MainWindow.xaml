@@ -21,7 +21,6 @@
             <!--<z:Cast x:Key="True" Type="{x:Type sys:Boolean}" >True</z:Cast>-->
             <!-- Equality converters -->
             <conv:EqualityConverter x:Key="NegativeBoolConverter" IsNegative="True" IsNullable="True" />
-            <conv:EqualityConverter x:Key="IsNullConverter" />
             <conv:EqualityConverter x:Key="NullToEmptyStringConverter" 
                                     CompareTo="{x:Null}" 
                                     TrueValue="" 
@@ -67,7 +66,7 @@
                 <conv:CastConverter ToType="{z:Nullable local:MachineState}" />
             </conv:GroupConverter>
 
-            <!-- Max Converter -->
+            <!-- Map Converter -->
             <conv:MapConverter x:Key="machineStateToNullBool" FallbackValue="{x:Null}" ConvertBackFallbackValue="{x:Static local:MachineState.None}" >
                 <sys:Boolean x:Key="{x:Static local:MachineState.On}" >True</sys:Boolean>
                 <sys:Boolean x:Key="{x:Static local:MachineState.Off}" >False</sys:Boolean>
@@ -94,11 +93,6 @@
                 <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.USEnglish}" >English</sys:String>
                 <sys:String x:Key="{x:Static glob:GregorianCalendarTypes.Arabic}"    >Arabic</sys:String>
             </conv:MapConverter>
-
-            <!-- BoolToVisibilityConverter -->
-            <!--<conv:BoolToVisibilityConverter x:Key="TrueToVisible" />
-            <conv:BoolToVisibilityConverter x:Key="TrueToCollapsed" IsNegative="True" />
-            <conv:BoolToVisibilityConverter x:Key="TrueToHidden" UseHidden="True" IsNegative="True" />-->
 
             <conv:BoolToVisibilityConverter x:Key="TrueToVisible" />
             <conv:BoolToVisibilityConverter x:Key="TrueToCollapsed" IsNegative="True" />
@@ -231,7 +225,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ComboBox  x:Name="combobox" Grid.Column="1" VerticalAlignment="Top"
+            <ComboBox x:Name="combobox" Grid.Column="1" VerticalAlignment="Top"
                 ItemsSource="{Binding DevicesList}" 
                 SelectedItem="{Binding CurrentMachineState, TargetNullValue={x:Static local:MachineState.None}}"
                 IsReadOnly="{Binding DevicesList, Converter={conv:NullOrEmptyConverter}}" />
@@ -256,7 +250,7 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <Slider Value="{Binding NullDoubleProperty, TargetNullValue={x:Static sys:Double.NaN}}" Minimum="0" Maximum="100"/>
+                <Slider Value="{Binding NullDoubleProperty, TargetNullValue=0.0}" Minimum="0" Maximum="100"/>
                 <TextBlock Text="{Binding NullDoubleProperty, StringFormat={}{0:0.00}}" HorizontalAlignment="Center" IsHitTestVisible="False"/>
                 <TextBlock Grid.Row="1" FontSize="14" FontWeight="Bold" Foreground="Wheat" TextAlignment="Center" Margin="1"
                     Text="[1,99]" Background="{Binding NullDoubleProperty, Converter={conv:NumInRangeConverter From=1, To=99, TrueValue=Green, FalseValue=Red}}"/>
