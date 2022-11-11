@@ -8,27 +8,20 @@
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Description>WPF helpers and utilities such as:
 Converter, Markup-extension (more in the future)
-See: https://github.com/barakbbn/WpfMartHelp
+ - See: https://github.com/barakbbn/WpfMart - 
 
 Please send feedback, questions, suggestions</Description>
 		<PackageProjectUrl>github.com/barakbbn/WpfMart</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>github.com/barakbbn/WpfMart</RepositoryUrl>
 		<PackageTags>WPF;ValueConverter;MarkupExtnsion</PackageTags>
-		<PackageReleaseNotes>Targeting .Net Core 3, .Net 4.8, .Net 4.5.2</PackageReleaseNotes>
+		<PackageReleaseNotes></PackageReleaseNotes>
 		<Authors>barakbbn</Authors>
 		<Company>-</Company>
+		<PackageLicenseExpression>ISC</PackageLicenseExpression>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	</ItemGroup>
-	<ItemGroup>
-	  <None Update="README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+	  <None Include="..\LICENSE" Link="LICENSE" Pack="true" PackagePath="" />
+	  <None Include="..\README.md" Link="README.md" />
 	</ItemGroup>
 </Project>

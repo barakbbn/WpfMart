@@ -1,13 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfMart", "WpfMart\WpfMart.csproj", "{BFC6A25A-F912-45B0-9BB1-DE4967121297}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfMart", "WpfMart\WpfMart.csproj", "{BFC6A25A-F912-45B0-9BB1-DE4967121297}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfMart.Tests", "WpfMart.Tests\WpfMart.Tests.csproj", "{0BF7F900-0037-4B9D-BFA3-67FE32D8D0B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfMart.Tests", "WpfMart.Tests\WpfMart.Tests.csproj", "{0BF7F900-0037-4B9D-BFA3-67FE32D8D0B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfMartSamples", "WpfMartSamples\WpfMartSamples.csproj", "{3CDC746F-A090-4558-9D1F-76E4A45DADB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfMartSamples", "WpfMartSamples\WpfMartSamples.csproj", "{3CDC746F-A090-4558-9D1F-76E4A45DADB7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3916C456-E1B2-4F30-8D4D-C1D2973A7AC6}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +36,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {22D5BE97-E894-4002-891E-E27FB2A30335}
 	EndGlobalSection
 EndGlobal
