@@ -1,9 +1,10 @@
 # WpfMart
 A set of WPF helpers and utilities such as value converters, markup-extensions, behaviors, etc.
 
-[GitHub](https://github.com/barakbbn/WpfMart) Source Code Repo.   
-[WpfMart](https://www.nuget.org/packages/WpfMart/) NuGet Package.
-
+[GitHub Repo](https://github.com/barakbbn/WpfMart) [![GitHub last commit](https://img.shields.io/github/last-commit/barakbbn/wpfmart)](https://github.com/barakbbn/WpfMart)
+[![GitHub license](https://img.shields.io/github/license/barakbbn/wpfmart)](https://github.com/barakbbn/wpfmart/LICENSE)  
+[NuGet package](https://www.nuget.org/packages/WpfMart)
+[![NuGet Badge](https://buildstats.info/nuget/WpfMart)](https://www.nuget.org/packages/WpfMart)
 
 ## Table of content
 * [Markup extensions](#markup-extensions)
